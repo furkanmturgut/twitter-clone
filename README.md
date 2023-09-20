@@ -1,8 +1,3 @@
-
-
-
-props'un içindeki elemanı başka bi# İkinci Proje: Öğrendiklerimi Test Etmek İçin Vue.js Kullanıldı
-
 Bu proje, Vue.js ve diğer birkaç teknolojiyi kullanarak geliştirilen ikinci projemdir. Bu projeyi oluştururken öğrendiğim becerileri test etmek ve uygulamak için harcadım. Aşağıda projede kullandığım teknolojiler ve ilgili kaynaklara erişim linkleri bulunmaktadır.
 
 ## Kullanılan Teknolojiler

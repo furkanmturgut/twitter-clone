@@ -3,6 +3,16 @@
     <div class="registerArea">
       <form @submit.prevent="handleRegister">
         <h3>Üye Ol</h3>
+        <span
+          style="max-width: 270px; background-color: #25abe1ff; color: #fff; border: 1px solid #25abe1ff; padding: 10px; border-radius: 8px;">
+          <label style="background-color: #25abe1ff;">
+            <input style="display: none; background-color: #25abe1ff;"  type="file"
+              @change="onUpload">
+            <span v-if="!errorState.file">Profil Resmi Ekleyin</span>
+            <span v-if="errorState.file">{{ errorMessage.file }} </span>
+          </label>
+        </span>
+       
         <span class="p-input-icon-right">
           <i class="pi pi-at" style="margin-right: 10px;" />
           <TWInputText v-model="enteredUsername" class="inputStyle" placeholder="Kullanıcı Adı Belirleyiniz"
@@ -30,9 +40,11 @@
         </TWInlineMessage>
 
         <span>
-          <TWButton @click="showToast"  type="submit" label="Üye ol"></TWButton>
+          <TWButton @click="showToast" type="submit" label="Üye ol"></TWButton>
         </span>
 
+        <TWInlineMessage class="inlineStyle" v-if="errorState.photo" severity="info">{{ errorMessage.photo }}
+        </TWInlineMessage>
         <TWInlineMessage class="inlineStyle" v-if="errorState.nullProp" severity="info">{{ errorMessage.nullProp }}
         </TWInlineMessage>
       </form>
@@ -52,6 +64,9 @@
 
 <script>
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { collection, addDoc, getFirestore, serverTimestamp } from "firebase/firestore";
+import { getStorage, ref as FSref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
@@ -60,16 +75,20 @@ export default {
   name: 'RegisterView',
   setup() {
     const auth = getAuth();
+    const firestore = getFirestore();
+    const storage = getStorage();
     const router = useRouter();
     const enteredMail = ref(null);
     const enteredUsername = ref(null);
     const enteredPassword = ref(null);
-    const errorState = ref({ username: false, email: false, password: false,nullProp:false });
-    const errorMessage = ref({ username: null, email: null, password: null,nullProp:null });
+    const errorState = ref({ username: false, email: false, password: false, nullProp: false, file: false});
+    const errorMessage = ref({ username: null, email: null, password: null, nullProp: null, file: null });
     const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     const passRegex = /^(?!\s)(.{6,})(?<!\s)$/;
     const usernameRegex = /^(?!\s)(.{5,})(?<!\s)$/;
     const toast = useToast();
+    const types = ["image/png", "image/jpeg", "image/jpg"];
+    const file = ref(null)
 
     const formValidations = (type) => {
       switch (type) {
@@ -99,32 +118,62 @@ export default {
             errorMessage.value.password = "En az 6 karakter şifre oluşturun"
           }
           break;
+     
       }
     }
 
     const showToast = () => {
-      if (usernameRegex.test(enteredUsername.value) && emailRegex.test(enteredMail.value) && passRegex.test(enteredPassword.value)) {
+      if (usernameRegex.test(enteredUsername.value) && emailRegex.test(enteredMail.value) && passRegex.test(enteredPassword.value) && file.value != null && file.value != undefined) {
 
-      toast.add({severity:'success',summary:'Kayıt Başarılı',detail:'Giriş ekranına yönlendiriliyorsunuz',life:2000})
+        toast.add({ severity: 'success', summary: 'Kayıt Başarılı', detail: 'Anasayfaya yönlendiriliyorsunuz', life: 2000 })
+      }
+    }
+    const onUpload = (e) => {
+      if (e.target.files[0] != undefined && e.target.files[0] != null) {
+        errorState.value.file = true
+        errorMessage.value.file = "Profil Resmi Eklendi";
+      }
+
+      const selected = e.target.files[0];
+      if (selected && types.includes(selected.type)) {
+        file.value = selected;
       }
     }
 
-    const handleRegister = () => {
-      if (usernameRegex.test(enteredUsername.value) && emailRegex.test(enteredMail.value) && passRegex.test(enteredPassword.value)) {
-        createUserWithEmailAndPassword(auth, enteredMail.value, enteredPassword.value)
-          .then((userCreintial) => {
-            const user = userCreintial.user;
+    const handleRegister = async () => {
+      console.log("DURUM:", file.value);
 
+      if (usernameRegex.test(enteredUsername.value) && emailRegex.test(enteredMail.value) && passRegex.test(enteredPassword.value) && file.value != null && file.value != undefined) {
+        createUserWithEmailAndPassword(auth, enteredMail.value, enteredPassword.value)
+          .then(async (userCreintial) => {
+            const user = userCreintial.user;
+            const id = Date.now();
+            const storageRef = FSref(storage, `profilePhoto/${id}`);
+            const fileSnapshot = await uploadBytes(
+              storageRef,
+              file.value
+            );
+            const downloadURL = await getDownloadURL(fileSnapshot.ref);
+            console.log("DU:", downloadURL);
+            console.log("FORMAT: ", typeof downloadURL)
+            addDoc(collection(firestore, 'users'), {
+              id: auth.currentUser.uid,
+              displayName: enteredUsername.value,
+              email: enteredMail.value,
+              saveDate: serverTimestamp(),
+              profilePhoto: downloadURL || '',
+
+            });
             setTimeout(() => {
-              if(!errorState.value.username){
+              if (!errorState.value.username) {
                 showToast()
-              router.push({ name: 'LoginView' })
+                router.push({ name: 'HomeView' })
               }
-            
-            }, 2200);
+            }, 1000);
 
             return updateProfile(user, {
               displayName: enteredUsername.value,
+              photoURL: downloadURL || ''
             });
 
           }).catch((error) => {
@@ -140,12 +189,12 @@ export default {
           })
       } else {
         errorState.value.nullProp = true
-        errorMessage.value.nullProp = "İşlemleri kontrol ediniz"
+        errorMessage.value.nullProp = "Görsel ekleyin ve tüm alanları doldurun"
         console.log("HATA")
       }
 
     }
-    return { enteredMail, enteredPassword, enteredUsername, handleRegister, formValidations, errorState, errorMessage,showToast }
+    return { enteredMail, enteredPassword, enteredUsername, handleRegister, formValidations, errorState, errorMessage, showToast, onUpload }
   }
 
 }
@@ -158,6 +207,7 @@ export default {
     margin-left: 10px;
   }
 }
+
 
 .inlineStyle {
   width: 270px;
@@ -253,4 +303,5 @@ form {
   height: 100%;
   position: absolute;
 
-}</style>
+}
+</style>

@@ -1,4 +1,7 @@
-# İkinci Proje: Öğrendiklerimi Test Etmek İçin Vue.js Kullanıldı
+
+
+
+props'un içindeki elemanı başka bi# İkinci Proje: Öğrendiklerimi Test Etmek İçin Vue.js Kullanıldı
 
 Bu proje, Vue.js ve diğer birkaç teknolojiyi kullanarak geliştirilen ikinci projemdir. Bu projeyi oluştururken öğrendiğim becerileri test etmek ve uygulamak için harcadım. Aşağıda projede kullandığım teknolojiler ve ilgili kaynaklara erişim linkleri bulunmaktadır.
 
@@ -18,5 +21,31 @@ Bu proje, Vue.js ve diğer birkaç teknolojiyi kullanarak geliştirilen ikinci p
 
 - **PrimeVue Resmi Web Sitesi:** PrimeVue ile ilgili belgeleri ve bileşenleri incelemek için [PrimeVue Resmi Web Sitesi](https://primefaces.org/primevue/) ziyaret edebilirsiniz.
 
-Bu projeyi geliştirirken öğrendiğim yeni yetenekleri ve deneyimleri kazanmak benim için çok önemliydi. Daha fazla bilgi ve ayrıntılar için projenin GitHub deposunu ziyaret edebilirsiniz.
 
+
+
+## Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
+
+Bu projeyi geliştirirken öğrendiğim yeni yetenekleri ve deneyimleri kazanmak benim için çok önemliydi. Daha fazla bilgi ve ayrıntılar için projenin GitHub deposunu ziyaret edebilirsiniz.
+r değişkene eşitleyerek props'u güncelleyebilir miyiz

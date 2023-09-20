@@ -29,14 +29,15 @@
         </div>
 
         <div class="enterTweet">
-          <TWCircleImage class="tweetUserPhoto"
-            image="https://blog.logrocket.com/wp-content/uploads/2021/09/ultimate-guide-SVGs-vue-js.png" size="large"
-            shape="circle" />
-          <TWTextarea class="tweetArea" v-model="value1" autoResize placeholder="Max 125 karakter ?">
+          <TWCircleImage class="tweetUserPhoto" :image="userProfilePhoto" size="large" shape="circle" />
+          <TWTextarea class="tweetArea" @keydown.enter.prevent maxRows="2" v-model="enteredTweet" autoResize
+            maxlength="172" placeholder="Naber ?">
           </TWTextarea>
+          <small style="display: flex; justify-content: center; font-size: 12px; color: #25abe1ef;">{{ tweetLenght
+          }}</small>
           <div>
             <TWButton style="background-color: #25abe1ef; margin: 20px;" icon="pi pi-image"></TWButton>
-            <TWButton style="float: right; background-color: #25abe1ef; margin: 20px;" label="Tweet">
+            <TWButton @click="addTweet" class="buttonTweet" label="Tweet">
             </TWButton>
           </div>
         </div>
@@ -55,7 +56,7 @@
         </div>
       </div>
     </div>
-
+    <TWToast></TWToast>
     <div class="otherArea">
       <TWAutoComplete class="searchStyle" v-model="valueSrch" :suggestions="items" @complete="search"
         placeholder="Profil ara" />
@@ -72,31 +73,35 @@
 
 <script>
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, query, collection, getDocs, orderBy } from 'firebase/firestore';
-import { ref } from 'vue';
+import { getFirestore, query, collection, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getDatabase, ref as RDref ,set } from "firebase/database";
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 export default {
   name: 'HomeView',
   setup() {
     const userId = ref(null);
     const auth = getAuth();
+    const toast = useToast();
     const firestore = getFirestore();
+    const database = getDatabase();
     const router = useRouter();
     const newUserList = ref([]);
     const fullUsersList = ref([]);
+    const userProfilePhoto = ref(null);
+    const enteredTweet = ref('');
+
+    const tweetLenght = computed(() => {
+      return enteredTweet.value.length <= 172 ? enteredTweet.value.length + "/172" : 'Maxiumum 172 karakterle sınırlıdır'
+    })
 
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        userId.value = user.uid;
-      }
-
       if (user !== null) {
+        userId.value = user.uid;
         user.providerData.forEach((profile) => {
-          console.log("Sign-in provider: " + profile.providerId);
-          console.log("  Provider-specific UID: " + profile.uid);
-          console.log("  Name: " + profile.displayName);
-          console.log("  Email: " + profile.email);
-          console.log("  Photo URL: " + profile.photoURL);
+          userProfilePhoto.value = profile.photoURL;
+
         });
       }
     });
@@ -105,7 +110,6 @@ export default {
       const userQuery = query(collection(firestore, "users"), orderBy("saveDate", "asc"));
       await getDocs(userQuery).then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-
           fullUsersList.value.push(doc.data());
           newUserList.value = fullUsersList.value.slice(fullUsersList.value.length - 5, fullUsersList.value.length).reverse();
 
@@ -122,12 +126,39 @@ export default {
       }
     }
 
-    return { signOutUser, newUserList }
+    const addTweet = () => {
+      if (enteredTweet.value.length != 0) {
+        addDoc(collection(firestore, "tweetLists"), {
+          userId: userId.value,
+          tweet: enteredTweet.value,
+          tweetDate: serverTimestamp()
+        }).then(() => {
+          console.log("OK TWEET")
+          enteredTweet.value = ''
+          toast.add({ severity: "info", life: 2000, detail: "Tweet Gönderildi", summary: "Tweet" })
+        });
+
+        const randomId = Date.now();
+       set(RDref(database,'userTweets/'+userId.value+ '/'+randomId ),{
+        userId:userId.value,
+        tweets:enteredTweet.value,
+       }).then(()=> {
+        enteredTweet.value = ''
+       })
+      }
+    }
+    return { signOutUser, newUserList, userProfilePhoto, tweetLenght, enteredTweet, addTweet }
   }
 }
 </script>
 
 <style scoped>
+.buttonTweet {
+  float: right;
+  background-color: #25abe1ef;
+  margin: 20px;
+}
+
 .searchStyle {
   height: 36px;
   display: flex;

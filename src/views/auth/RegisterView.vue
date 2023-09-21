@@ -6,7 +6,7 @@
         <span
           style="max-width: 270px; background-color: #25abe1ff; color: #fff; border: 1px solid #25abe1ff; padding: 10px; border-radius: 8px;">
           <label style="background-color: #25abe1ff;">
-            <input style="display: none; background-color: #25abe1ff;"  type="file"
+            <input  style="display: none; background-color: #25abe1ff;"  type="file" accept="image/png,image/jpeg,image/jpg "
               @change="onUpload">
             <span v-if="!errorState.file">Profil Resmi Ekleyin</span>
             <span v-if="errorState.file">{{ errorMessage.file }} </span>
@@ -87,7 +87,6 @@ export default {
     const passRegex = /^(?!\s)(.{6,})(?<!\s)$/;
     const usernameRegex = /^(?!\s)(.{5,})(?<!\s)$/;
     const toast = useToast();
-    const types = ["image/png", "image/jpeg", "image/jpg"];
     const file = ref(null)
 
     const formValidations = (type) => {
@@ -134,10 +133,8 @@ export default {
         errorMessage.value.file = "Profil Resmi Eklendi";
       }
 
-      const selected = e.target.files[0];
-      if (selected && types.includes(selected.type)) {
-        file.value = selected;
-      }
+      file.value = e.target.files[0];
+      
     }
 
     const handleRegister = async () => {
@@ -190,7 +187,6 @@ export default {
       } else {
         errorState.value.nullProp = true
         errorMessage.value.nullProp = "Görsel ekleyin ve tüm alanları doldurun"
-        console.log("HATA")
       }
 
     }

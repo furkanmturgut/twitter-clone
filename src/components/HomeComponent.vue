@@ -1,0 +1,160 @@
+<template>
+  <div class="feedArea">
+    <div>
+      <div class="topBanner"><span style="font-weight: bold; margin-left: 10px;">Anaysayfa</span> <i class="pi pi-star"
+          style="float: right; margin-right: 20px; margin-top: 5px;"></i>
+      </div>
+
+      <div class="enterTweet">
+        <TWCircleImage class="tweetUserPhoto" :image="profilePhoto" size="large" shape="circle" />
+        <TWTextarea class="tweetArea" maxRows="2" v-model="enteredTweet" autoResize maxlength="172" placeholder="Naber ?">
+        </TWTextarea>
+        <small style="display: flex; justify-content: center; font-size: 12px; color: #25abe1ef;">{{ tweetLenght
+        }}</small>
+        <div>
+          <TWButton style="background-color: #25abe1ef; margin: 20px;" icon="pi pi-image"></TWButton>
+          <TWButton @click="addTweet" class="buttonTweet" label="Tweet">
+          </TWButton>
+        </div>
+      </div>
+
+      <div class="feedPost">
+        <div style="display: flex; flex-direction: row;">
+          <TWCircleImage class="tweetUserPhoto" image="" size="large" shape="circle"></TWCircleImage>
+          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@</span>
+        </div>
+        <div>
+          <p class="textFeed"></p>
+        </div>
+
+        <div class="feedAction">
+          <i class="pi pi-heart" style="margin-top: 8px;"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { getUserPhoto, getUserId, getUserDisplay } from '@/firebase/authProcces';
+import saveTweet from '@/firebase/saveTweet.js';
+import { ref, computed } from 'vue';
+import { serverTimestamp } from 'firebase/firestore';
+import { useToast } from 'primevue/usetoast';
+
+export default {
+  name: "HomeComponent",
+  setup() {
+    const profilePhoto = getUserPhoto();
+    const enteredTweet = ref('');
+    const displayName = getUserDisplay();
+    const userId = getUserId();
+    const toast = useToast();
+
+    // Tweet'in karakter sınırlaması yapıldı.
+    const tweetLenght = computed(() => {
+      return enteredTweet.value.length <= 172 ? enteredTweet.value.length + "/172" : 'Maxiumum 172 karakterle sınırlıdır'
+    });
+
+    //Tweet Atma
+    const addTweet = async () => {
+      if (enteredTweet.value.length != 0) {
+        const tweetData = {
+          displayName: displayName,
+          profile: profilePhoto,
+          tweet: enteredTweet.value,
+          tweetDate: serverTimestamp(),
+          userId: userId
+        };
+        await saveTweet(tweetData);
+        enteredTweet.value = '';
+        toast.add({ severity: "info", life: 2000, detail: "Tweet Gönderildi", summary: "Tweet" })
+      }
+
+
+
+    }
+
+
+
+
+
+
+    return { profilePhoto, tweetLenght, enteredTweet, addTweet }
+  }
+
+}
+</script>
+
+<style scoped>
+textarea {
+  overflow-y: scroll;
+  max-height: 80px;
+  margin-top: 10px;
+  margin-left: 10px;
+  border: 1px solid #ffff;
+  width: 80%;
+}
+
+.buttonTweet {
+  float: right;
+  background-color: #25abe1ef;
+  margin: 20px;
+}
+
+.feedAction {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #f3f3f3ff;
+  margin: 30px;
+
+}
+
+.textFeed {
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+
+.feedPost {
+  width: 98%;
+  height: 160px;
+  margin-top: 12px;
+  margin-left: 1%;
+  margin-right: 1%;
+  background-color: #fff;
+
+}
+
+.tweetUserPhoto {
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.enterTweet {
+  width: 98%;
+  height: 180px;
+  margin-top: 1px;
+  margin-right: 1%;
+  margin-left: 1%;
+  background-color: #fff;
+}
+
+.topBanner {
+  margin-right: 1%;
+  margin-left: 1%;
+  width: 98%;
+  height: 50px;
+  background-color: #fff;
+}
+
+i {
+  font-size: 20px;
+}
+
+.feedArea {
+  background-color: #e9e9e9;
+  width: 60%;
+  height: max-content;
+}
+</style>

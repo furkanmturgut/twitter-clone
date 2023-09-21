@@ -6,6 +6,7 @@ import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/auth/LoginView.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import ProfileView from '@/views/ProfileView.vue'
 
 const routes = [
   { path: "/", component: WelcomeView, name: "WelcomeView" },
@@ -23,6 +24,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: "/:catchAll(.*)", component: ErrorComponent, name: "ErrorComponent" },
+  {path:"/profile/:id" ,props:true,component:ProfileView,name:"ProfileView",meta:{requiresAuth:true}}
 ];
 
 const router = createRouter({

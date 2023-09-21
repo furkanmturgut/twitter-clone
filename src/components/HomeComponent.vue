@@ -18,13 +18,13 @@
         </div>
       </div>
 
-      <div class="feedPost">
+      <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetDate">
         <div style="display: flex; flex-direction: row;">
-          <TWCircleImage class="tweetUserPhoto" image="" size="large" shape="circle"></TWCircleImage>
-          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@</span>
+          <TWCircleImage class="tweetUserPhoto" :image="tweet.profile" size="large" shape="circle"></TWCircleImage>
+          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@{{ tweet.displayName }}</span>
         </div>
         <div>
-          <p class="textFeed"></p>
+          <p class="textFeed">{{ tweet.tweet }}</p>
         </div>
 
         <div class="feedAction">
@@ -39,17 +39,25 @@
 import { getUserPhoto, getUserId, getUserDisplay } from '@/firebase/authProcces';
 import saveTweet from '@/firebase/saveTweet.js';
 import { ref, computed } from 'vue';
-import { serverTimestamp } from 'firebase/firestore';
+import {
+  getFirestore,
+  query,
+  collection,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from "firebase/firestore";
 import { useToast } from 'primevue/usetoast';
-
 export default {
   name: "HomeComponent",
   setup() {
     const profilePhoto = getUserPhoto();
     const enteredTweet = ref('');
     const displayName = getUserDisplay();
+    const firestore = getFirestore();
     const userId = getUserId();
     const toast = useToast();
+    const tweetList = ref([]);
 
     // Tweet'in karakter sınırlaması yapıldı.
     const tweetLenght = computed(() => {
@@ -58,6 +66,7 @@ export default {
 
     //Tweet Atma
     const addTweet = async () => {
+      //TweetList adında firestore'a kaydedildi
       if (enteredTweet.value.length != 0) {
         const tweetData = {
           displayName: displayName,
@@ -68,19 +77,25 @@ export default {
         };
         await saveTweet(tweetData);
         enteredTweet.value = '';
-        toast.add({ severity: "info", life: 2000, detail: "Tweet Gönderildi", summary: "Tweet" })
+        toast.add({ severity: "info", life: 2000, detail: "Tweet Gönderildi", summary: "Tweet" });
       }
-
-
-
     }
 
+    //Tweet Çekme
+    const getTweetList = () => {
+      tweetList.value = []
+      const tweetQuery = query(collection(firestore, "tweetLists"), orderBy("tweetDate", "desc"));
+      onSnapshot(tweetQuery, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          tweetList.value.push(doc.data());
+        });
+      });
+    }
+    getTweetList();
 
 
 
-
-
-    return { profilePhoto, tweetLenght, enteredTweet, addTweet }
+    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList }
   }
 
 }

@@ -1,11 +1,12 @@
 <template>
-<router-view></router-view>
-
+  <router-view></router-view>
 </template>
 
 <script>
 export default {
   name: 'App',
+  
+
 }
 </script>
 
@@ -19,4 +20,12 @@ body {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
+.cardRow {
+  display: flex;
+}
+.feedArea {
+  background-color: #e9e9e9;
+  width: 60%;
+  height: max-content;
+}
 </style>

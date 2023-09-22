@@ -17,7 +17,8 @@ import 'primeflex/primeflex.css';
 import "primevue/resources/themes/lara-light-indigo/theme.css";
 import FileUpload from 'primevue/fileupload';
 import InlineMessage from 'primevue/inlinemessage';
-
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 
 const app = createApp(App);
@@ -38,5 +39,7 @@ app.component("TWCircleImage",Avatar);
 app.component("TWTextarea",Textarea);
 app.component("TWAutoComplete",AutoComplete);
 app.component("TWUploadButton",FileUpload);
+app.component("TWTabPanel",TabPanel);
+app.component("TWTabView",TabView);
 
 app.mount('#app');

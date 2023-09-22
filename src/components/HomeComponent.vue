@@ -7,7 +7,7 @@
 
       <div class="enterTweet">
         <TWCircleImage class="tweetUserPhoto" :image="profilePhoto" size="large" shape="circle" />
-        <TWTextarea class="tweetArea" maxRows="2" v-model="enteredTweet" autoResize maxlength="172" placeholder="Naber ?">
+        <TWTextarea class="tweetArea" maxRows="2" v-model="enteredTweet" autoResize maxlength="250" placeholder="Naber ?">
         </TWTextarea>
         <small style="display: flex; justify-content: center; font-size: 12px; color: #25abe1ef;">{{ tweetLenght
         }}</small>
@@ -61,7 +61,7 @@ export default {
 
     // Tweet'in karakter sınırlaması yapıldı.
     const tweetLenght = computed(() => {
-      return enteredTweet.value.length <= 172 ? enteredTweet.value.length + "/172" : 'Maxiumum 172 karakterle sınırlıdır'
+      return enteredTweet.value.length <= 250 ? enteredTweet.value.length + "/250" : 'Maxiumum 250 karakterle sınırlıdır'
     });
 
     //Tweet Atma

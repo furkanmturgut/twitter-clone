@@ -3,6 +3,7 @@
     <menu-component></menu-component>
 
     <div class="feedArea">
+      <!-- back button & username & total tweet -->
       <div class="topBanner">
         <div style="width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; ">
           <i class="pi pi-arrow-left" style=" margin-left: 20px; color: #25abe1ef; font-weight: bold;"></i>
@@ -14,17 +15,69 @@
         </div>
       </div>
 
+      <!-- Profile Photo & username & follow and share buttons -->
       <div class="profileHeader">
-        <div style="display: flex; flex-direction: column;">
-          <span>aaa</span>
+        <div style="display: flex; flex-direction: column;  width: 50%; height:120px ;">
           <TWCircleImage class="tweetUserPhoto"
             image="https://i20.haber7.net/resize/1300x788//haber/haber7/photos/2020/06/teoman_konserinde_acikladi_uzulmeyin_1580982800_721.jpg"
             size="xxlarge" shape="circle"></TWCircleImage>
           <span style="font-weight: bold;  margin-left: 20px; margin-top: 10px; ">Kullanıcı Adı</span>
+          <span style="font-size: 14px; margin-left: 20px; color: #c5c1c1;">@username</span>
+        </div>
+        <!-- follow and share button  -->
+        <div
+          style="display: flex; flex-direction: row; width: 50%; height:120px; justify-content: center; align-items: center;">
+          <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
+          <TWButton class="followStyle">Takip Et</TWButton>
         </div>
       </div>
 
+      <div class="descArea">
+        <!-- bio text -->
+        <p style="margin-left: 20px; font-size: 14px; color: #696969	;">Lorem ipsum dolor sit amet consectetur adipisicing
+          elit. Laudantium molestias consectetur nobis cumque voluptas itaque, ipsa quibusdam. Reprehenderit, sunt
+          maiores.</p>
+        <!-- bio info (city born) -->
+        <div style="display: flex; flex-direction: row; align-items: center; margin-left: 20px; color: #696969;">
+          <span style="margin-right: 20px;">
+            <i class="pi pi-map-marker"> Aksaray</i>
+          </span>
+          <span>
+            <i class="pi pi-calendar"> 14 Ocak</i>
+          </span>
+        </div>
+        <!--joined date -->
+        <span style="margin-left: 20px; margin-top: 8px; font-size: 16px; color: #696969;">
+          <i class=" pi pi-megaphone"> 30 Şubat katıldı</i>
+        </span>
 
+        <!-- following and followers -->
+        <div style="display: flex; flex-direction: row; margin-left: 20px; margin-top: 20px;">
+          <span style="margin-right: 20px;"> <strong>0 </strong>Takipçi</span>
+          <span><strong>0 </strong>Takip Edilen</span>
+        </div>
+
+        <div>
+          <TWTabView>
+            <TWTabPanel>
+              <template  #header>
+                <span @click="selectedTab('tweet')" :class="{active:tweetValue,inActive:!tweetValue}" >Tweetler</span>
+              </template>
+              
+            </TWTabPanel>
+            <TWTabPanel >
+              <template #header>
+                <span @click="selectedTab('like')" :class="{active:likeValue,inActive:!likeValue}" >Beğeniler</span>
+              </template>
+              begen
+            </TWTabPanel>
+
+          </TWTabView>
+
+        </div>
+
+
+      </div>
 
     </div>
 
@@ -35,33 +88,102 @@
 <script>
 import MenuComponent from '@/components/MenuComponent.vue'
 import UserComponent from '@/components/UserComponent.vue'
+import {ref} from 'vue';
 export default {
   name: "ProfileView",
   components: { MenuComponent, UserComponent },
+  setup(){
+    
+    const tweetValue = ref(false);
+    const likeValue = ref(false);
+   
 
+    const selectedTab = (key) => {
+
+      if(key === "tweet"){
+        tweetValue.value = true;
+        likeValue.value = false
+      }else if(key === "like"){
+        tweetValue.value = false;
+        likeValue.value = true;
+      }else{
+        tweetValue.value = true;
+
+      }
+    }
+
+    selectedTab()
+
+    return {selectedTab,tweetValue,likeValue}
+  }
 
 }
 </script>
 
 
-<style scoped>
+<style scoped >
+.active {
+  color:#25abe1ef
+} 
+
+.inActive {
+  color:#696969
+}
+
+.tabStyle:hover {
+  color: #696969;
+}
+
+.followStyle {
+  width: 100px;
+  height: 40px;
+  border-radius: 16px;
+  background-color: #fff;
+  color: #25abe1ef;
+}
+
+.shareButtonStyle {
+  width: 60px;
+  height: 40px;
+  background-color: #fff;
+  color: #25abe1ef;
+  border-radius: 26px;
+  margin-right: 10px;
+}
+
+.shareButtonStyle:hover {
+  background-color: #25abe1ef;
+  color: #fff;
+}
+
+
 .tweetUserPhoto {
   margin-left: 20px;
   margin-top: 10px;
-  width: 14%;
-  height: 50%;
+  width: 80px;
+  height: 80px;
 
+}
+
+.descArea {
+  width: 98%;
+  height: 500px;
+  background-color: #fff;
+  margin-right: 1%;
+  margin-left: 1%;
+  display: flex;
+  flex-direction: column;
 }
 
 .profileHeader {
   width: 98%;
-  height: 200px;
+  height: auto;
   background-color: #fff;
   margin-top: 3px;
   margin-right: 1%;
   margin-left: 1%;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .topBanner {

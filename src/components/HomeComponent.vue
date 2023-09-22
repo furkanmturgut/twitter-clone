@@ -20,8 +20,9 @@
 
       <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetDate">
         <div style="display: flex; flex-direction: row;">
-          <TWCircleImage class="tweetUserPhoto" :image="tweet.profile" size="large" shape="circle"></TWCircleImage>
-          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@{{ tweet.displayName }}</span>
+          <TWCircleImage @click="userProfile(tweet.userId)" class="tweetUserPhoto" :image="tweet.profile" size="large" shape="circle"></TWCircleImage>
+          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@{{
+            tweet.displayName }}</span>
         </div>
         <div>
           <p class="textFeed">{{ tweet.tweet }}</p>
@@ -36,9 +37,8 @@
 </template>
 
 <script>
-import { getUserPhoto, getUserId, getUserDisplay } from '@/firebase/authProcces';
 import saveTweet from '@/firebase/saveTweet.js';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
   getFirestore,
   query,
@@ -48,16 +48,41 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 import { useToast } from 'primevue/usetoast';
+import { getAuth,onAuthStateChanged } from 'firebase/auth';
+import { app } from '@/firebase/config';
+import { useRouter } from 'vue-router';
+
 export default {
   name: "HomeComponent",
   setup() {
-    const profilePhoto = getUserPhoto();
+    const profilePhoto = ref(null)
     const enteredTweet = ref('');
-    const displayName = getUserDisplay();
+    const displayName = ref(null);
     const firestore = getFirestore();
-    const userId = getUserId();
+    const userId = ref(null);
     const toast = useToast();
+    const auth = getAuth(app);
     const tweetList = ref([]);
+    const router = useRouter();
+
+    const userProfile = (selectUser) =>{
+      console.log("SELECTED ID: ",selectUser)
+      router.push({name:"ProfileView",params:{id:selectUser}})
+    }
+
+    //Photo id ve ve username alındı
+    onMounted(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user != null) {
+          userId.value = user.uid;
+          user.providerData.forEach((profile) => {
+            displayName.value = profile.displayName;
+            profilePhoto.value = profile.photoURL;
+          });
+        }
+      });
+    })
+
 
     // Tweet'in karakter sınırlaması yapıldı.
     const tweetLenght = computed(() => {
@@ -69,11 +94,11 @@ export default {
       //TweetList adında firestore'a kaydedildi
       if (enteredTweet.value.length != 0) {
         const tweetData = {
-          displayName: displayName,
-          profile: profilePhoto,
+          displayName: displayName.value,
+          profile: profilePhoto.value,
           tweet: enteredTweet.value,
           tweetDate: serverTimestamp(),
-          userId: userId
+          userId: userId.value
         };
         await saveTweet(tweetData);
         enteredTweet.value = '';
@@ -86,6 +111,11 @@ export default {
       tweetList.value = []
       const tweetQuery = query(collection(firestore, "tweetLists"), orderBy("tweetDate", "desc"));
       onSnapshot(tweetQuery, (querySnapshot) => {
+        querySnapshot.forEach(() => {
+          tweetList.value = []
+        });
+      });
+      onSnapshot(tweetQuery, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           tweetList.value.push(doc.data());
         });
@@ -95,7 +125,7 @@ export default {
 
 
 
-    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList }
+    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList,userProfile }
   }
 
 }

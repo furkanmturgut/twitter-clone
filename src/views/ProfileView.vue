@@ -18,29 +18,25 @@
       <!-- Profile Photo & username & follow and share buttons -->
       <div class="profileHeader">
         <div style="display: flex; flex-direction: column;  width: 50%; height:120px ;">
-          <TWCircleImage class="tweetUserPhoto"
-            image="https://i20.haber7.net/resize/1300x788//haber/haber7/photos/2020/06/teoman_konserinde_acikladi_uzulmeyin_1580982800_721.jpg"
-            size="xxlarge" shape="circle"></TWCircleImage>
+          <TWCircleImage class="tweetUserPhoto" :image="photoUrl" size="xxlarge" shape="circle"></TWCircleImage>
           <span style="font-weight: bold;  margin-left: 20px; margin-top: 10px; ">Kullanıcı Adı</span>
-          <span style="font-size: 14px; margin-left: 20px; color: #c5c1c1;">@username</span>
+          <span style="font-size: 14px; margin-left: 20px; color: #c5c1c1;">@{{ userName }}</span>
         </div>
         <!-- follow and share button  -->
         <div
           style="display: flex; flex-direction: row; width: 50%; height:120px; justify-content: center; align-items: center;">
           <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-          <TWButton class="followStyle">Takip Et</TWButton>
+          <TWButton @click="profileButton" class="followStyle">{{ isUserControl ? 'Düzenle' : 'Takip Et' }}</TWButton>
         </div>
       </div>
 
       <div class="descArea">
         <!-- bio text -->
-        <p style="margin-left: 20px; font-size: 14px; color: #696969	;">Lorem ipsum dolor sit amet consectetur adipisicing
-          elit. Laudantium molestias consectetur nobis cumque voluptas itaque, ipsa quibusdam. Reprehenderit, sunt
-          maiores.</p>
+        <p style="margin-left: 20px; font-size: 14px; color: #696969	;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam velit doloribus labore. Aspernatur incidunt impedit alias at non! Quos, maxime!</p>
         <!-- bio info (city born) -->
         <div style="display: flex; flex-direction: row; align-items: center; margin-left: 20px; color: #696969;">
           <span style="margin-right: 20px;">
-            <i class="pi pi-map-marker"> Aksaray</i>
+            <i class="pi pi-map-marker"> Akjsaray</i>
           </span>
           <span>
             <i class="pi pi-calendar"> 14 Ocak</i>
@@ -60,22 +56,20 @@
         <div>
           <TWTabView>
             <TWTabPanel>
-              <template  #header>
-                <span @click="selectedTab('tweet')" :class="{active:tweetValue,inActive:!tweetValue}" >Tweetler</span>
-              </template>
-              
-            </TWTabPanel>
-            <TWTabPanel >
               <template #header>
-                <span @click="selectedTab('like')" :class="{active:likeValue,inActive:!likeValue}" >Beğeniler</span>
+                <span @click="selectedTab('tweet')" :class="{ active: tweetValue, inActive: !tweetValue }">Tweetler</span>
+              </template>
+
+            </TWTabPanel>
+            <TWTabPanel>
+              <template #header>
+                <span @click="selectedTab('like')" :class="{ active: likeValue, inActive: !likeValue }">Beğeniler</span>
               </template>
               begen
             </TWTabPanel>
-
           </TWTabView>
 
         </div>
-
 
       </div>
 
@@ -86,48 +80,92 @@
 </template>
 
 <script>
-import MenuComponent from '@/components/MenuComponent.vue'
-import UserComponent from '@/components/UserComponent.vue'
-import {ref} from 'vue';
+import MenuComponent from '@/components/MenuComponent.vue';
+import UserComponent from '@/components/UserComponent.vue';
+import { getUserPhoto, getUserDisplay, getUserId } from '@/firebase/authProcces';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { getFirestore, getDocs, collection, query } from 'firebase/firestore';
+import { app } from '@/firebase/config';
 export default {
   name: "ProfileView",
   components: { MenuComponent, UserComponent },
-  setup(){
-    
+  setup() {
+
+    const userID = ref(null);
     const tweetValue = ref(false);
     const likeValue = ref(false);
-   
+    const userName = getUserDisplay();
+    const photoUrl = getUserPhoto();
+    const myID = getUserId();
+    const router = useRouter();
+    const isUserControl = ref(false);
+    const firestore = getFirestore(app);
+    const usersData = ref([]);
+    // const filteredUser = ref([]);
 
-    const selectedTab = (key) => {
-
-      if(key === "tweet"){
-        tweetValue.value = true;
-        likeValue.value = false
-      }else if(key === "like"){
-        tweetValue.value = false;
-        likeValue.value = true;
-      }else{
-        tweetValue.value = true;
-
+    const userControlFunc = () => {
+      if (String(myID) == String(userID.value)) {
+        console.log("Aynı");
+        isUserControl.value = true
+      } else {
+        console.log("Farklı");
+        isUserControl.value = false
       }
+
+      return isUserControl.value
     }
 
-    selectedTab()
+    userID.value = router.currentRoute.value.params.id;
+    onMounted(async () => {
+      userControlFunc();
+      const userQuery = query(collection(firestore, "users"));
+      await getDocs(userQuery).then((querySnapshot) => {
+        querySnapshot.forEach((users) => {
+          usersData.value.push(users.data());
+        });
+      });
+      
+    });
 
-    return {selectedTab,tweetValue,likeValue}
+    const filteredUser = usersData.value.find((item) => {
+     return  item.id === myID;
+    });
+    console.log("Filtered User data : ", filteredUser);
+
+    const profileButton = () => {
+      console.log("Click");
+      // console.log("FT: ", filteredUser.value[0].biography)
+
+    }
+
+    // Selected TabManu redesign
+    const selectedTab = (key) => {
+      if (key === "tweet") {
+        tweetValue.value = true;
+        likeValue.value = false
+      } else if (key === "like") {
+        tweetValue.value = false;
+        likeValue.value = true;
+      } else {
+        tweetValue.value = true;
+      }
+    }
+    selectedTab();
+
+    return { selectedTab, tweetValue, likeValue, userName, photoUrl, isUserControl, profileButton, filteredUser }
   }
-
 }
 </script>
 
 
 <style scoped >
 .active {
-  color:#25abe1ef
-} 
+  color: #25abe1ef
+}
 
 .inActive {
-  color:#696969
+  color: #696969
 }
 
 .tabStyle:hover {

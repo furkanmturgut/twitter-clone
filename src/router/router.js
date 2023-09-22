@@ -24,7 +24,7 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: "/:catchAll(.*)", component: ErrorComponent, name: "ErrorComponent" },
-  {path:"/profile/:id" ,props:true,component:ProfileView,name:"ProfileView",meta:{requiresAuth:true}}
+  {path:"/profile/:id" ,props:true,component:ProfileView,name:"ProfileView",meta:{requiresAuth:true}},
 ];
 
 const router = createRouter({

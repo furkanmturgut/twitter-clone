@@ -20,38 +20,49 @@
       Çıkış Yap
     </div>
 
-  </div> 
+  </div>
 </template>
 
 <script>
-import { getUserDisplay, getUserId } from '@/firebase/authProcces.js';
 import { useRouter } from 'vue-router';
-import { getAuth,signOut } from 'firebase/auth';
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { app } from '@/firebase/config';
+import { onMounted, ref } from 'vue';
 export default {
   name: "MenuComponent",
   setup() {
-    const userName = getUserDisplay();
-    const userId = getUserId();
+    const userName = ref(null)
+    const userId = ref(null);
     const router = useRouter();
-    const auth = getAuth();
+    const auth = getAuth(app);
 
-    console.log("Deneme: ", userName);
-    console.log("DNM: ", userId);
+    //Verileri aldık firebase hatası var bakacam!
+    onMounted(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user != null) {
+          userId.value = user.uid;
+          user.providerData.forEach((profile) => {
+            userName.value = profile.displayName;
+          })
+        }
+      });
+    });
+
 
     const signOutUser = () => {
       signOut(auth).then(() => {
-        router.push({name:'LoginView'})
+        router.push({ name: 'LoginView' })
       });
     }
 
     const goToProfile = () => {
       router.push({
-        name:'ProfileView',
-        params:{id:userId}
+        name: 'ProfileView',
+        params: { id: userId.value }
       })
     }
 
-    return { userName,signOutUser,goToProfile }
+    return { userName, signOutUser, goToProfile }
   }
 
 }
@@ -61,10 +72,11 @@ export default {
 i {
   font-size: 20px;
 }
+
 .hoverExit:hover {
   color: #25abe1ef
-
 }
+
 .menuLogo {
   width: 50px;
   height: 50px;

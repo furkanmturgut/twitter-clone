@@ -159,6 +159,9 @@ export default {
               email: enteredMail.value,
               saveDate: serverTimestamp(),
               profilePhoto: downloadURL || '',
+              biography:null,
+              birthday:null,
+              city:null
 
             });
             setTimeout(() => {

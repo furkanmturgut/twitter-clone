@@ -40,6 +40,7 @@ export default {
     onMounted(() => {
       onAuthStateChanged(auth, (user) => {
         if (user != null) {
+          console.log("Menu veri çekti")
           userId.value = user.uid;
           user.providerData.forEach((profile) => {
             userName.value = profile.displayName;

@@ -19,6 +19,8 @@ import FileUpload from 'primevue/fileupload';
 import InlineMessage from 'primevue/inlinemessage';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
+import DynamicDialog from 'primevue/dynamicdialog';
+import DialogService from 'primevue/dialogservice';
 
 
 const app = createApp(App);
@@ -27,6 +29,7 @@ app.use(router);
 app.use(PrimeVue);
 app.use(ConfirmationService);
 app.use(ToastService);
+app.use(DialogService);
 
 // PrimeVue
 app.component("TWButton",Button);
@@ -41,5 +44,6 @@ app.component("TWAutoComplete",AutoComplete);
 app.component("TWUploadButton",FileUpload);
 app.component("TWTabPanel",TabPanel);
 app.component("TWTabView",TabView);
+app.component("TWDialog",DynamicDialog);
 
 app.mount('#app');

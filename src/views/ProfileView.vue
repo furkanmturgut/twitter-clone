@@ -1,108 +1,38 @@
 <template>
-  <div class="cardRow">
-    <menu-component></menu-component>
-
-    <div class="feedArea">
-      <!-- back button & username & total tweet -->
-      <div class="topBanner">
-        <div style="width: 50px; height: 50px; display: flex; justify-content: center; align-items: center; ">
-          <i class="pi pi-arrow-left" style=" margin-left: 20px; color: #25abe1ef; font-weight: bold;"></i>
-        </div>
-
-        <div style="display: flex; flex-direction: column; margin-left: 20px; justify-content: center;">
-          <span style="font-weight: bold;  ">Kullanıcı Adı</span>
-          <span style="font-size: 12px; color: #918c8c ;">68 Tweet</span>
-        </div>
-      </div>
-
-      <!-- Profile Photo & username & follow and share buttons -->
-      <div class="profileHeader">
-        <div style="display: flex; flex-direction: column;  width: 50%; height:120px ;">
-          <TWCircleImage class="tweetUserPhoto" :image="photoUrl" size="xxlarge" shape="circle"></TWCircleImage>
-          <span style="font-weight: bold;  margin-left: 20px; margin-top: 10px; ">Kullanıcı Adı</span>
-          <span style="font-size: 14px; margin-left: 20px; color: #c5c1c1;">@{{ userName }}</span>
-        </div>
-        <!-- follow and share button  -->
-        <div
-          style="display: flex; flex-direction: row; width: 50%; height:120px; justify-content: center; align-items: center;">
-          <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-          <TWButton @click="profileButton" class="followStyle">{{ isUserControl ? 'Düzenle' : 'Takip Et' }}</TWButton>
-        </div>
-      </div>
-
-      <div class="descArea">
-        <!-- bio text -->
-        <p style="margin-left: 20px; font-size: 14px; color: #696969	;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam velit doloribus labore. Aspernatur incidunt impedit alias at non! Quos, maxime!</p>
-        <!-- bio info (city born) -->
-        <div style="display: flex; flex-direction: row; align-items: center; margin-left: 20px; color: #696969;">
-          <span style="margin-right: 20px;">
-            <i class="pi pi-map-marker"> Akjsaray</i>
-          </span>
-          <span>
-            <i class="pi pi-calendar"> 14 Ocak</i>
-          </span>
-        </div>
-        <!--joined date -->
-        <span style="margin-left: 20px; margin-top: 8px; font-size: 16px; color: #696969;">
-          <i class=" pi pi-megaphone"> 30 Şubat katıldı</i>
-        </span>
-
-        <!-- following and followers -->
-        <div style="display: flex; flex-direction: row; margin-left: 20px; margin-top: 20px;">
-          <span style="margin-right: 20px;"> <strong>0 </strong>Takipçi</span>
-          <span><strong>0 </strong>Takip Edilen</span>
-        </div>
-
-        <div>
-          <TWTabView>
-            <TWTabPanel>
-              <template #header>
-                <span @click="selectedTab('tweet')" :class="{ active: tweetValue, inActive: !tweetValue }">Tweetler</span>
-              </template>
-
-            </TWTabPanel>
-            <TWTabPanel>
-              <template #header>
-                <span @click="selectedTab('like')" :class="{ active: likeValue, inActive: !likeValue }">Beğeniler</span>
-              </template>
-              begen
-            </TWTabPanel>
-          </TWTabView>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <user-component></user-component>
-  </div>
+  <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate" :isUser="isUserControl"
+    @editProfile="profileButton(filteredUser.displayName)"></profile-component>
 </template>
 
 <script>
-import MenuComponent from '@/components/MenuComponent.vue';
-import UserComponent from '@/components/UserComponent.vue';
-import { getUserPhoto, getUserDisplay, getUserId } from '@/firebase/authProcces';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { getUserId } from '@/firebase/authProcces';
+import { onMounted, ref,provide } from 'vue';
 import { getFirestore, getDocs, collection, query } from 'firebase/firestore';
 import { app } from '@/firebase/config';
+import { useRouter } from 'vue-router';
+import ProfileComponent from '@/components/ProfileComponent.vue';
+import { defineAsyncComponent } from 'vue';
+import { useDialog } from 'primevue/usedialog';
 export default {
+  components: { ProfileComponent },
   name: "ProfileView",
-  components: { MenuComponent, UserComponent },
-  setup() {
 
+  setup() {
     const userID = ref(null);
     const tweetValue = ref(false);
     const likeValue = ref(false);
-    const userName = getUserDisplay();
-    const photoUrl = getUserPhoto();
     const myID = getUserId();
     const router = useRouter();
     const isUserControl = ref(false);
     const firestore = getFirestore(app);
     const usersData = ref([]);
-    // const filteredUser = ref([]);
+    let filteredUser = ref([]);
+    const joinedDate = ref(null);
+    const EditProfile = defineAsyncComponent(() =>
+      import('@/components/EditProfile.vue')
+    );
+    const dialog = useDialog();
+    provide("filteredUser",filteredUser);
+
 
     const userControlFunc = () => {
       if (String(myID) == String(userID.value)) {
@@ -117,6 +47,7 @@ export default {
     }
 
     userID.value = router.currentRoute.value.params.id;
+    console.log("USER ID: ", userID.value)
     onMounted(async () => {
       userControlFunc();
       const userQuery = query(collection(firestore, "users"));
@@ -124,20 +55,33 @@ export default {
         querySnapshot.forEach((users) => {
           usersData.value.push(users.data());
         });
+
+        filteredUser.value = usersData.value.find((item) => {
+          return item.id == userID.value;
+
+        });
+
+        joinedDate.value = filteredUser.value.saveDate.toDate().toLocaleDateString();
+
       });
+
+    });
+
+    const profileButton = (a) => {
+      console.log("A",a);
+      dialog.open(EditProfile, {
+        props: {
+          header: 'Profili Güncelle',
+          style: {
+            width: '450px',
+          },
+
+          modal: true,
+        },
       
-    });
-
-    const filteredUser = usersData.value.find((item) => {
-     return  item.id === myID;
-    });
-    console.log("Filtered User data : ", filteredUser);
-
-    const profileButton = () => {
-      console.log("Click");
-      // console.log("FT: ", filteredUser.value[0].biography)
-
+      });
     }
+
 
     // Selected TabManu redesign
     const selectedTab = (key) => {
@@ -153,13 +97,29 @@ export default {
     }
     selectedTab();
 
-    return { selectedTab, tweetValue, likeValue, userName, photoUrl, isUserControl, profileButton, filteredUser }
+    return { selectedTab, tweetValue, likeValue, isUserControl, profileButton, filteredUser, joinedDate }
   }
 }
 </script>
 
 
 <style scoped >
+.bioActive {
+  margin-left: 20px;
+  margin-top: 26px;
+  font-size: 14px;
+  color: #696969;
+}
+
+.bioInActive {
+  margin-left: 20px;
+  margin-top: 26px;
+  font-size: 14px;
+  color: #25abe1ef;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .active {
   color: #25abe1ef
 }
@@ -168,9 +128,7 @@ export default {
   color: #696969
 }
 
-.tabStyle:hover {
-  color: #696969;
-}
+
 
 .followStyle {
   width: 100px;

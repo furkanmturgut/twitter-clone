@@ -1,5 +1,6 @@
 <template>
   <div class="feedArea">
+    <TWToast></TWToast>
     <div>
       <div class="topBanner"><span style="font-weight: bold; margin-left: 10px;">Anaysayfa</span> <i class="pi pi-star"
           style="float: right; margin-right: 20px; margin-top: 5px;"></i>
@@ -20,7 +21,8 @@
 
       <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetDate">
         <div style="display: flex; flex-direction: row;">
-          <TWCircleImage @click="userProfile(tweet.userId)" class="tweetUserPhoto" :image="tweet.profile" size="large" shape="circle"></TWCircleImage>
+          <TWCircleImage @click="userProfile(tweet.userId)" class="tweetUserPhoto" :image="tweet.profile" size="large"
+            shape="circle"></TWCircleImage>
           <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@{{
             tweet.displayName }}</span>
         </div>
@@ -48,7 +50,7 @@ import {
   serverTimestamp
 } from "firebase/firestore";
 import { useToast } from 'primevue/usetoast';
-import { getAuth,onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/firebase/config';
 import { useRouter } from 'vue-router';
 
@@ -65,9 +67,16 @@ export default {
     const tweetList = ref([]);
     const router = useRouter();
 
-    const userProfile = (selectUser) =>{
-      console.log("SELECTED ID: ",selectUser)
-      router.push({name:"ProfileView",params:{id:selectUser}})
+    const userProfile = (selectUser) => {
+      console.log("SELECTED ID: ", selectUser)
+
+      if(selectUser == userId.value){
+        router.push({ name: "ProfileView", params: { id: selectUser } })
+      }else {
+        router.push({ name: "UserView", params: { id: selectUser } })
+      }
+
+
     }
 
     //Photo id ve ve username alındı
@@ -125,7 +134,7 @@ export default {
 
 
 
-    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList,userProfile }
+    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList, userProfile }
   }
 
 }

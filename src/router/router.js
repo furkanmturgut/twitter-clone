@@ -6,7 +6,9 @@ import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/auth/LoginView.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
-import ProfileView from '@/views/ProfileView.vue'
+import ProfileView from '@/views/ProfileView.vue';
+import UserView from '@/views/UserView.vue';
+
 
 const routes = [
   { path: "/", component: WelcomeView, name: "WelcomeView" },
@@ -25,6 +27,8 @@ const routes = [
   },
   { path: "/:catchAll(.*)", component: ErrorComponent, name: "ErrorComponent" },
   {path:"/profile/:id" ,props:true,component:ProfileView,name:"ProfileView",meta:{requiresAuth:true}},
+  {path:"/user/:id" ,props:true,component:UserView,name:"UserView",meta:{requiresAuth:true}},
+
 ];
 
 const router = createRouter({
@@ -35,7 +39,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const auth = getAuth();
+
   onAuthStateChanged(auth, async (user) => {
+
     if (requiresAuth && !user) {
       next("/login");
     } else if (requiresAuth == false && user) {

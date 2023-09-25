@@ -1,11 +1,18 @@
 <template>
-  <router-view></router-view>
+  <div class="cardRow">
+    <menu-component></menu-component>
+    <router-view></router-view>
+    <new-user></new-user>
+  </div>
 </template>
 
 <script>
+import MenuComponent from './components/MenuComponent.vue'
+import NewUser from './components/NewUser.vue'
 export default {
+  components: { MenuComponent, NewUser },
   name: 'App',
-  
+
 
 }
 </script>
@@ -13,7 +20,7 @@ export default {
 <style >
 body {
   margin: 0px !important;
-  
+
 }
 
 * {
@@ -23,6 +30,7 @@ body {
 .cardRow {
   display: flex;
 }
+
 .feedArea {
   background-color: #e9e9e9;
   width: 60%;

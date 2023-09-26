@@ -1,5 +1,8 @@
 <template>
-    <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate" @editProfile="profileButton"></profile-component>
+    <menu-component></menu-component>
+    <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate"
+        @editProfile="profileButton"></profile-component>
+    <new-user></new-user>
 </template>
   
 <script>
@@ -9,10 +12,15 @@ import { getFirestore, getDocs, collection, query } from 'firebase/firestore';
 import { app } from '@/firebase/config';
 import { useRouter } from 'vue-router';
 import ProfileComponent from '@/components/ProfileComponent.vue';
+import MenuComponent from '@/components/MenuComponent.vue';
+import NewUser from '@/components/NewUser.vue';
+
 export default {
     name: "UserView",
     components: {
-        ProfileComponent
+        ProfileComponent,
+        MenuComponent,
+        NewUser
     },
     setup() {
 
@@ -59,11 +67,11 @@ export default {
         });
 
         const profileButton = () => {
-             
 
-                console.log("User")
 
-            
+            console.log("User")
+
+
         }
         // Selected TabManu redesign
         const selectedTab = (key) => {

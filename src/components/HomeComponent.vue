@@ -19,21 +19,9 @@
         </div>
       </div>
 
-      <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetDate">
-        <div style="display: flex; flex-direction: row;">
-          <TWCircleImage @click="userProfile(tweet.userId)" class="tweetUserPhoto" :image="tweet.profile" size="large"
-            shape="circle"></TWCircleImage>
-          <span style="display: flex;  align-items: center; margin-left: 10px; color: rgb(163, 159, 159);">@{{
-            tweet.displayName }}</span>
-        </div>
-        <div>
-          <p class="textFeed">{{ tweet.tweet }}</p>
-        </div>
+      <tweet-component :tweetList="tweetList"></tweet-component>
 
-        <div class="feedAction">
-          <i class="pi pi-heart" style="margin-top: 8px;"></i>
-        </div>
-      </div>
+     
     </div>
   </div>
 </template>
@@ -47,14 +35,17 @@ import {
   collection,
   orderBy,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+ 
 } from "firebase/firestore";
 import { useToast } from 'primevue/usetoast';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/firebase/config';
 import { useRouter } from 'vue-router';
+import TweetComponent from './TweetComponent.vue';
 
 export default {
+  components: { TweetComponent },
   name: "HomeComponent",
   setup() {
     const profilePhoto = ref(null)
@@ -80,7 +71,7 @@ export default {
     }
 
     //Photo id ve ve username alındı
-    onMounted(() => {
+    onMounted(async ()  => {
       onAuthStateChanged(auth, (user) => {
         if (user != null) {
           userId.value = user.uid;
@@ -89,9 +80,10 @@ export default {
             profilePhoto.value = profile.photoURL;
           });
         }
+        console.log("ID",profilePhoto.value)
       });
-    })
-
+    
+    });
 
     // Tweet'in karakter sınırlaması yapıldı.
     const tweetLenght = computed(() => {
@@ -102,12 +94,16 @@ export default {
     const addTweet = async () => {
       //TweetList adında firestore'a kaydedildi
       if (enteredTweet.value.length != 0) {
+        const tweetId = Date.now();
         const tweetData = {
           displayName: displayName.value,
           profile: profilePhoto.value,
           tweet: enteredTweet.value,
           tweetDate: serverTimestamp(),
-          userId: userId.value
+          userId: userId.value,
+          likeState:false,
+          totalLike:0,
+          tweetId:tweetId
         };
         await saveTweet(tweetData);
         enteredTweet.value = '';
@@ -156,29 +152,6 @@ textarea {
   margin: 20px;
 }
 
-.feedAction {
-  display: flex;
-  justify-content: center;
-  border-top: 1px solid #f3f3f3ff;
-  margin: 30px;
-
-}
-
-.textFeed {
-  width: 100%;
-  text-align: center;
-  margin: 0;
-}
-
-.feedPost {
-  width: 98%;
-  height: 160px;
-  margin-top: 12px;
-  margin-left: 1%;
-  margin-right: 1%;
-  background-color: #fff;
-
-}
 
 .tweetUserPhoto {
   margin-left: 10px;

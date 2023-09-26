@@ -8,7 +8,7 @@
 
             <div style="display: flex; flex-direction: column; margin-left: 20px; justify-content: center;">
                 <span style="font-weight: bold;  ">{{ filteredUser.fullname }}</span>
-                <span style="font-size: 12px; color: #918c8c ;">68 Tweet</span>
+                <span style="font-size: 12px; color: #918c8c ;">{{ tweetList.length }} Tweet</span>
             </div>
         </div>
 
@@ -25,21 +25,22 @@
             <div
                 style="display: flex; width: 100%; height:auto; justify-content: flex-end; margin-right: 20px; align-items: center;">
                 <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-                <TWButton @click="profileButton(filteredUser.displayName)" class="followStyle">{{ isUser ? 'Düzenle' : 'Takip Et' }}</TWButton>
+                <TWButton @click="profileButton(filteredUser.displayName)" class="followStyle">{{ isUser ? 'Düzenle' :
+                    'Takip Et' }}</TWButton>
             </div>
         </div>
 
         <div class="descArea">
             <!-- bio text -->
-            <p :class="[filteredUser.biography != ''  ? 'bioActive' : 'bioInActive']">
-                {{ filteredUser.biography == '' && isUser ? 'Düzenleme yapmak için dokun':  filteredUser.biography }}</p>
+            <p :class="[filteredUser.biography != '' ? 'bioActive' : 'bioInActive']">
+                {{ filteredUser.biography == '' && isUser ? 'Düzenleme yapmak için dokun' : filteredUser.biography }}</p>
             <!-- bio info (city born) -->
             <div style="display: flex; flex-direction: row; align-items: center; margin-left: 20px; color: #696969;">
                 <span style="margin-right: 20px;">
-                    <i class="pi pi-map-marker"> {{ filteredUser.city != '' ? filteredUser.city : ' -' }}</i>
+                    <i class="pi pi-map-marker"> {{ filteredUser.city != '' ? ' ' + filteredUser.city : ' -' }}</i>
                 </span>
                 <span>
-                    <i class="pi pi-calendar"> {{ filteredUser.birthday != '' ? filteredUser.birthday : ' -' }}</i>
+                    <i class="pi pi-calendar"> {{ filteredUser.birthday != '' ? ' ' + filteredUser.birthday : ' -' }}</i>
                 </span>
             </div>
             <!--joined date -->
@@ -60,6 +61,8 @@
                             <span @click="selectedTab('tweet')"
                                 :class="{ active: tweetValue, inActive: !tweetValue }">Tweetler</span>
                         </template>
+                        <!-- Tweetleri listeniyor bu özellik  -->
+                        <tweet-component :tweetList="tweetList"></tweet-component>
 
                     </TWTabPanel>
                     <TWTabPanel>
@@ -67,30 +70,69 @@
                             <span @click="selectedTab('like')"
                                 :class="{ active: likeValue, inActive: !likeValue }">Beğeniler</span>
                         </template>
-                        begen
+
                     </TWTabPanel>
                 </TWTabView>
-
             </div>
             <TWDialog></TWDialog>
         </div>
-
     </div>
 </template>
   
 
 <script>
-
+import { getFirestore, getDocs, collection, query, where } from 'firebase/firestore';
+import { app } from '@/firebase/config';
+import { onMounted, ref } from 'vue';
+import { getUserId } from '@/firebase/authProcces';
+import TweetComponent from './TweetComponent.vue';
 export default {
+    components: { TweetComponent },
     props: ["filteredUser", "joinedDate", "isUser"],
-    emits:["editProfile"],
-    setup(props,{emit}) {
-        const profileButton = (display) => {
-            emit("editProfile",display)
+    emits: ["editProfile"],
 
+    setup(props, { emit }) {
+        const firestore = getFirestore(app);
+        const tweetList = ref([]);
+        const myID = getUserId();
+        const tweetValue = ref(false);
+        const likeValue = ref(false);
+
+        const profileButton = (display) => {
+            emit("editProfile", display)
         }
 
-        return{profileButton}
+        onMounted(() => {
+            myTweetList();
+
+        })
+
+        const myTweetList = async () => {
+            const q = query(collection(firestore, "tweetLists"), where("userId", "==", myID));
+            await getDocs(q).then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    tweetList.value.push(doc.data());
+                });
+            })
+        }
+
+        // Selected TabManu redesign
+        const selectedTab = (key) => {
+            if (key === "tweet") {
+                tweetValue.value = true;
+                likeValue.value = false
+            } else if (key === "like") {
+                tweetValue.value = false;
+                likeValue.value = true;
+            } else {
+                tweetValue.value = true;
+            }
+        }
+        selectedTab();
+
+
+
+        return { selectedTab, profileButton, tweetList, tweetValue, likeValue }
     }
 
 }

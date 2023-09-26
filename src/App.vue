@@ -1,19 +1,15 @@
 <template>
   <div class="cardRow">
-    <menu-component></menu-component>
     <router-view></router-view>
-    <new-user></new-user>
-  </div>
+</div>
 </template>
 
 <script>
-import MenuComponent from './components/MenuComponent.vue'
-import NewUser from './components/NewUser.vue'
+
 export default {
-  components: { MenuComponent, NewUser },
-  name: 'App',
 
-
+  
+  name:'App'
 }
 </script>
 

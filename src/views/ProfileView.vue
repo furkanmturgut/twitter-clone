@@ -1,25 +1,29 @@
 <template>
+  <menu-component></menu-component>
+
   <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate" :isUser="isUserControl"
     @editProfile="profileButton(filteredUser.displayName)"></profile-component>
+
+  <new-user></new-user>
 </template>
 
 <script>
 import { getUserId } from '@/firebase/authProcces';
-import { onMounted, ref,provide } from 'vue';
+import { onMounted, ref, provide } from 'vue';
 import { getFirestore, getDocs, collection, query } from 'firebase/firestore';
 import { app } from '@/firebase/config';
 import { useRouter } from 'vue-router';
 import ProfileComponent from '@/components/ProfileComponent.vue';
 import { defineAsyncComponent } from 'vue';
 import { useDialog } from 'primevue/usedialog';
+import MenuComponent from '@/components/MenuComponent.vue';
+import NewUser from '@/components/NewUser.vue';
 export default {
-  components: { ProfileComponent },
+  components: { ProfileComponent, MenuComponent, NewUser },
   name: "ProfileView",
 
   setup() {
     const userID = ref(null);
-    const tweetValue = ref(false);
-    const likeValue = ref(false);
     const myID = getUserId();
     const router = useRouter();
     const isUserControl = ref(false);
@@ -31,15 +35,13 @@ export default {
       import('@/components/EditProfile.vue')
     );
     const dialog = useDialog();
-    provide("filteredUser",filteredUser);
 
-
+    // Verimi EditProfile provide ile yolladım
+    provide("filteredUser", filteredUser);
     const userControlFunc = () => {
       if (String(myID) == String(userID.value)) {
-        console.log("Aynı");
         isUserControl.value = true
       } else {
-        console.log("Farklı");
         isUserControl.value = false
       }
 
@@ -47,9 +49,9 @@ export default {
     }
 
     userID.value = router.currentRoute.value.params.id;
-    console.log("USER ID: ", userID.value)
     onMounted(async () => {
       userControlFunc();
+
       const userQuery = query(collection(firestore, "users"));
       await getDocs(userQuery).then((querySnapshot) => {
         querySnapshot.forEach((users) => {
@@ -67,8 +69,9 @@ export default {
 
     });
 
+    //Edit Prfoil için dialog ekranı
     const profileButton = (a) => {
-      console.log("A",a);
+      console.log("A", a);
       dialog.open(EditProfile, {
         props: {
           header: 'Profili Güncelle',
@@ -78,26 +81,11 @@ export default {
 
           modal: true,
         },
-      
+
       });
     }
 
-
-    // Selected TabManu redesign
-    const selectedTab = (key) => {
-      if (key === "tweet") {
-        tweetValue.value = true;
-        likeValue.value = false
-      } else if (key === "like") {
-        tweetValue.value = false;
-        likeValue.value = true;
-      } else {
-        tweetValue.value = true;
-      }
-    }
-    selectedTab();
-
-    return { selectedTab, tweetValue, likeValue, isUserControl, profileButton, filteredUser, joinedDate }
+    return { isUserControl, profileButton, filteredUser, joinedDate }
   }
 }
 </script>

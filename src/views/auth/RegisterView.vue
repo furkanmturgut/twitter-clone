@@ -160,7 +160,7 @@ export default {
               saveDate: serverTimestamp(),
               profilePhoto: downloadURL || '',
               biography:'',
-              birthday:null,
+              birthday:'',
               city:'',
               fullname:''
 

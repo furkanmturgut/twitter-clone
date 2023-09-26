@@ -1,5 +1,5 @@
 <template>
-  <div class="homeMenu">
+  <div class="homeMenu" >
     <img class="menuLogo" src="@/assets/x-logo.png">
     <div style="font-size: 20px; font-family: 'Times New Roman', Times, serif; color: #25abe1ef;">Hoşgeldin, {{ userName
     }}</div>
@@ -63,7 +63,7 @@ export default {
       })
     }
 
-    return { userName, signOutUser, goToProfile }
+    return {userId, userName, signOutUser, goToProfile }
   }
 
 }

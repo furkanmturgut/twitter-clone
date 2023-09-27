@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <tweet-component :tweetList="tweetList"></tweet-component>
+      <tweet-component :tweetList="tweetList" ></tweet-component>
 
      
     </div>
@@ -67,7 +67,6 @@ export default {
         router.push({ name: "UserView", params: { id: selectUser } })
       }
 
-
     }
 
     //Photo id ve ve username alındı
@@ -80,7 +79,6 @@ export default {
             profilePhoto.value = profile.photoURL;
           });
         }
-        console.log("ID",profilePhoto.value)
       });
     
     });

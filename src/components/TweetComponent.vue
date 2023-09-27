@@ -17,52 +17,110 @@
         </div>
 
         <div class="feedAction">
-            <i @click="likeButton(tweet)" :class="[tweet.likeState ? 'pi pi-heart-fill' : 'pi pi-heart']" class=" likeStyle"
-                style="margin-top: 8px;"> <span style="color: black; ">{{ ' '+tweet.totalLike }}</span></i>
+            <i @click="likeButton(tweet)" class="pi pi-heart " style="margin-top: 8px;">
+                <span style="color: black; ">{{ ' ' + tweet.totalLike }} </span></i>
         </div>
     </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import { getFirestore, collection, where, query, getDocs, updateDoc } from 'firebase/firestore';
+import { onMounted, ref } from 'vue';
+import { getFirestore, collection, query, getDocs, where, updateDoc, onSnapshot } from 'firebase/firestore';
 import { app } from '@/firebase/config';
+import { getUserId } from '@/firebase/authProcces';
 export default {
     props: ["tweetList"],
     name: "TweetComponent",
     setup() {
         const firestore = getFirestore(app);
-        const likeSave = ref(null);
+        const likeState = ref(false);
+        const myId = getUserId();
+        let totalLikes = ref(null);
         const options = { hour: '2-digit', minute: '2-digit' };
+        const likeArray = ref([]);
+        onMounted(async () => {
+            const q = query(collection(firestore, "likes"));
+            onSnapshot(q, (querySnapshot) => {
+                querySnapshot.forEach(() => {
+                    likeArray.value = [];
+                });
+            });
+            onSnapshot(q, (querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    likeArray.value.push(doc.data());
+
+                });
+            });
+
+        });
+        //finish onMounted
 
         const likeButton = async (tweet) => {
-            if (tweet.likeState == true) {
-                tweet.likeState = false
+            // içindeki twitler filtrelendi
+            const filterArray = likeArray.value.filter((item) => {
+                return item.tweetId == tweet.tweetId;
+            });
+            // console.log("Total Like : ", filterArray[0].totalLike)
+            // like içinde olan beğenen kullanıcı arrayleri 
+            const likeUserArray = filterArray[0].likeUser;
+
+            //Kullanıcıya göre filterelendi
+            const filterLikeUser = likeUserArray.filter((item) => {
+                return item == myId
+            });
+
+
+            // console.log("Length : ", filterLikeUser.length)
+            filterLikeUser.length >= 1 ? likeState.value = true : likeState.value = false;
+            let likeCount = filterArray[0].totalLike;
+            console.log("Like count type: ", typeof likeCount)
+
+            if (likeState.value == true) {
+                likeState.value = false
+                console.log("Data : ", likeUserArray)
+                const indexToRemove = likeUserArray.indexOf(myId);
+                if (indexToRemove !== -1) {
+                    likeUserArray.splice(indexToRemove, 1);
+                    totalLikes = likeCount - 1;
+
+                    console.log("Count Silme", totalLikes)
+                    console.log("Sildi", likeUserArray)
+                }
 
                 console.log("False")
-                likeSave.value = tweet.totalLike - 1;
 
             } else {
-                tweet.likeState = true;
-                likeSave.value = tweet.totalLike + 1;
-                console.log("True")
+                likeState.value = true;
+                likeUserArray.push(myId);
+                totalLikes = likeCount + 1
 
+                console.log("Count Ekleme", totalLikes)
+
+                console.log("Ekledi ", likeUserArray)
+                console.log("True")
             }
 
-            const q2 = query(collection(firestore, "tweetLists"), where("tweetId", "==", tweet.tweetId));
+            const q2 = query(collection(firestore, "likes"), where("tweetId", "==", tweet.tweetId));
             await getDocs(q2).then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     const documentData = doc.data();
-                    const updatedData = { ...documentData, totalLike:likeSave.value ,likeState:tweet.likeState};
+                    const updatedData = { ...documentData, likeUser: likeUserArray, totalLike: totalLikes };
                     updateDoc(doc.ref, updatedData)
                 });
 
+            });
+
+            const queryTweets = query(collection(firestore, "tweetLists"), where("tweetId", "==", tweet.tweetId));
+            await getDocs(queryTweets).then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const documentData = doc.data();
+                    const updatedData = { ...documentData, totalLike: totalLikes };
+                    updateDoc(doc.ref, updatedData);
+                })
             })
         }
 
-
-
-        return { options, likeButton }
+        return { options, likeButton, likeState, totalLikes }
     }
 
 
@@ -70,15 +128,6 @@ export default {
 </script>
 
 <style scoped>
-.likeStyle {
-    color: red;
-
-}
-
-.likeStyle:hover {
-    color: red
-}
-
 .feedPost {
     width: 98%;
     height: 160px;

@@ -25,9 +25,10 @@
             <div
                 style="display: flex; width: 100%; height:auto; justify-content: flex-end; margin-right: 20px; align-items: center;">
                 <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-                <TWButton @click="profileButton(filteredUser.displayName)" class="followStyle">{{ isUser ? 'Düzenle' :
+                <TWButton @click="profileButton" class="followStyle">{{ isUser ? 'Düzenle' :
                     'Takip Et' }}</TWButton>
             </div>
+
         </div>
 
         <div class="descArea">
@@ -62,7 +63,7 @@
                                 :class="{ active: tweetValue, inActive: !tweetValue }">Tweetler</span>
                         </template>
                         <!-- Tweetleri listeniyor bu özellik  -->
-                        <tweet-component :tweetList="tweetList"></tweet-component>
+                        <tweet-component  :tweetList="tweetList"></tweet-component>
 
                     </TWTabPanel>
                     <TWTabPanel>
@@ -70,7 +71,7 @@
                             <span @click="selectedTab('like')"
                                 :class="{ active: likeValue, inActive: !likeValue }">Beğeniler</span>
                         </template>
-
+                        <like-tweet-component></like-tweet-component>
                     </TWTabPanel>
                 </TWTabView>
             </div>
@@ -81,22 +82,29 @@
   
 
 <script>
-import { getFirestore, getDocs, collection, query, where } from 'firebase/firestore';
+import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { app } from '@/firebase/config';
 import { onMounted, ref } from 'vue';
-import { getUserId } from '@/firebase/authProcces';
 import TweetComponent from './TweetComponent.vue';
+import LikeTweetComponent from './LikeTweetComponent.vue';
+import { useRouter } from 'vue-router';
 export default {
-    components: { TweetComponent },
+    components: { TweetComponent,LikeTweetComponent },
     props: ["filteredUser", "joinedDate", "isUser"],
     emits: ["editProfile"],
 
     setup(props, { emit }) {
         const firestore = getFirestore(app);
         const tweetList = ref([]);
-        const myID = getUserId();
         const tweetValue = ref(false);
         const likeValue = ref(false);
+        const userID = ref(null);
+        const router = useRouter()
+        const selectedState = ref("tweet");
+
+
+        userID.value = router.currentRoute.value.params.id;
+        console.log("Router PArams Like:",userID.value)
 
         const profileButton = (display) => {
             emit("editProfile", display)
@@ -108,21 +116,29 @@ export default {
         })
 
         const myTweetList = async () => {
-            const q = query(collection(firestore, "tweetLists"), where("userId", "==", myID));
-            await getDocs(q).then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    tweetList.value.push(doc.data());
-                });
-            })
+            const q = query(collection(firestore, "tweetLists"), where("userId", "==", userID.value));
+            onSnapshot(q,(querySnapshot)=> {
+                querySnapshot.forEach(()=> {
+                    tweetList.value = []
+                })
+            });
+
+            onSnapshot(q,(querySnapshot)=> {
+                querySnapshot.forEach((item)=> {
+                    tweetList.value.push(item.data());
+                })
+            });
         }
 
         // Selected TabManu redesign
         const selectedTab = (key) => {
             if (key === "tweet") {
                 tweetValue.value = true;
+                selectedState.value = "tweet"
                 likeValue.value = false
             } else if (key === "like") {
                 tweetValue.value = false;
+                selectedState.value = "like"
                 likeValue.value = true;
             } else {
                 tweetValue.value = true;
@@ -130,9 +146,7 @@ export default {
         }
         selectedTab();
 
-
-
-        return { selectedTab, profileButton, tweetList, tweetValue, likeValue }
+        return { selectedTab, profileButton, tweetList, tweetValue, likeValue ,selectedState}
     }
 
 }
@@ -199,7 +213,8 @@ export default {
 
 .descArea {
     width: 98%;
-    height: 500px;
+    height: max-content;
+    margin-bottom: 16px;
     background-color: #fff;
     margin-right: 1%;
     margin-left: 1%;

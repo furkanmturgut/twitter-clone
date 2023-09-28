@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <tweet-component :tweetList="tweetList" ></tweet-component>
+      <tweet-component  :tweetList="tweetList" ></tweet-component>
 
      
     </div>
@@ -41,9 +41,7 @@ import {
 import { useToast } from 'primevue/usetoast';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/firebase/config';
-import { useRouter } from 'vue-router';
 import TweetComponent from './TweetComponent.vue';
-
 export default {
   components: { TweetComponent },
   name: "HomeComponent",
@@ -55,19 +53,9 @@ export default {
     const userId = ref(null);
     const toast = useToast();
     const auth = getAuth(app);
-    const tweetList = ref([]);
-    const router = useRouter();
+    let tweetList = ref([]);
 
-    const userProfile = (selectUser) => {
-      console.log("SELECTED ID: ", selectUser)
-
-      if(selectUser == userId.value){
-        router.push({ name: "ProfileView", params: { id: selectUser } })
-      }else {
-        router.push({ name: "UserView", params: { id: selectUser } })
-      }
-
-    }
+ 
 
     //Photo id ve ve username alındı
     onMounted(async ()  => {
@@ -91,7 +79,7 @@ export default {
     //Tweet Atma
     const addTweet = async () => {
       //TweetList adında firestore'a kaydedildi
-      if (enteredTweet.value.length != 0) {
+      if (enteredTweet.value.trim() !== '') {
         const tweetId = Date.now();
         const tweetData = {
           displayName: displayName.value,
@@ -101,8 +89,10 @@ export default {
           userId: userId.value,
           likeState:false,
           totalLike:0,
-          tweetId:tweetId
+          tweetId:tweetId,
+          likeUser:[]
         };
+
         await saveTweet(tweetData);
         enteredTweet.value = '';
         toast.add({ severity: "info", life: 2000, detail: "Tweet Gönderildi", summary: "Tweet" });
@@ -121,6 +111,7 @@ export default {
       onSnapshot(tweetQuery, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           tweetList.value.push(doc.data());
+
         });
       });
     }
@@ -128,7 +119,7 @@ export default {
 
 
 
-    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList, userProfile }
+    return { profilePhoto, tweetLenght, enteredTweet, addTweet, tweetList }
   }
 
 }

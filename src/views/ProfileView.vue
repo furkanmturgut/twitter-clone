@@ -2,7 +2,9 @@
   <menu-component></menu-component>
 
   <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate" :isUser="isUserControl"
-    @editProfile="profileButton(filteredUser.displayName)"></profile-component>
+    @editProfile="profileButton(filteredUser.displayName)">
+
+  </profile-component>
 
   <new-user></new-user>
 </template>
@@ -38,11 +40,15 @@ export default {
 
     // Verimi EditProfile provide ile yolladım
     provide("filteredUser", filteredUser);
+    
     const userControlFunc = () => {
       if (String(myID) == String(userID.value)) {
         isUserControl.value = true
+        console.log("Aga bu ok")
       } else {
-        isUserControl.value = false
+        isUserControl.value = false       
+         console.log("Aga bu no")
+
       }
 
       return isUserControl.value

@@ -1,5 +1,5 @@
 <template>
-    <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetDate">
+    <div class="feedPost" v-for="tweet in tweetList" :key="tweet.tweetId">
         <div style="display: flex; flex-direction: row;">
             <TWCircleImage @click="userProfile(tweet.userId)" class="tweetUserPhoto" :image="tweet.profile" size="large"
                 shape="circle"></TWCircleImage>
@@ -17,112 +17,92 @@
         </div>
 
         <div class="feedAction">
-            <i @click="likeButton(tweet)" class="pi pi-heart " style="margin-top: 8px;">
+            <i @click="likeButton(tweet)" :class="[tweet.likeUser.includes(myID) ? 'pi pi-heart-fill' :'pi pi-heart' ]" style="margin-top: 8px; color: red;">
                 <span style="color: black; ">{{ ' ' + tweet.totalLike }} </span></i>
         </div>
     </div>
 </template>
 
 <script>
-import { onMounted, ref } from 'vue';
-import { getFirestore, collection, query, getDocs, where, updateDoc, onSnapshot } from 'firebase/firestore';
+import { ref } from 'vue';
+import { getFirestore, collection, query, getDocs, where, updateDoc } from 'firebase/firestore';
 import { app } from '@/firebase/config';
 import { getUserId } from '@/firebase/authProcces';
+import {useRouter} from 'vue-router';
 export default {
     props: ["tweetList"],
     name: "TweetComponent",
     setup() {
         const firestore = getFirestore(app);
         const likeState = ref(false);
-        const myId = getUserId();
+        const router = useRouter();
+        const userID = ref(null);
+        const myID = getUserId();
         let totalLikes = ref(null);
         const options = { hour: '2-digit', minute: '2-digit' };
         const likeArray = ref([]);
-        onMounted(async () => {
-            const q = query(collection(firestore, "likes"));
-            onSnapshot(q, (querySnapshot) => {
-                querySnapshot.forEach(() => {
-                    likeArray.value = [];
-                });
-            });
-            onSnapshot(q, (querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    likeArray.value.push(doc.data());
 
-                });
-            });
+        userID.value = router.currentRoute.value.params.id;
+    
+        const userProfile = (selectUser) => {
+            
+            if (selectUser !=  userID.value) {
+                console.log("Buradan gitti")
+                router.push({ name: "UserView", params: { id: selectUser } })
 
-        });
-        //finish onMounted
+            } else {
+                console.log("Buradan gitti 2")
+
+                router.push({ name: "ProfileView", params: { id: selectUser } })
+
+            }
+        }
 
         const likeButton = async (tweet) => {
             // içindeki twitler filtrelendi
-            const filterArray = likeArray.value.filter((item) => {
-                return item.tweetId == tweet.tweetId;
-            });
-            // console.log("Total Like : ", filterArray[0].totalLike)
-            // like içinde olan beğenen kullanıcı arrayleri 
-            const likeUserArray = filterArray[0].likeUser;
+            likeArray.value = tweet;
+            // console.log("Like User Array :", likeArray.value.likeUser)
 
+            const likeUserArray = likeArray.value.likeUser;
+            // console.log("Like User Array :", likeArray.value[0])
             //Kullanıcıya göre filterelendi
             const filterLikeUser = likeUserArray.filter((item) => {
-                return item == myId
+                return item ==  myID
             });
 
 
-            // console.log("Length : ", filterLikeUser.length)
             filterLikeUser.length >= 1 ? likeState.value = true : likeState.value = false;
-            let likeCount = filterArray[0].totalLike;
-            console.log("Like count type: ", typeof likeCount)
+            let likeCount = likeArray.value.totalLike;
+            // console.log("Like count type: ", typeof likeCount)
 
             if (likeState.value == true) {
                 likeState.value = false
-                console.log("Data : ", likeUserArray)
-                const indexToRemove = likeUserArray.indexOf(myId);
+                // console.log("Data : ", likeUserArray)
+                const indexToRemove = likeUserArray.indexOf( myID);
                 if (indexToRemove !== -1) {
                     likeUserArray.splice(indexToRemove, 1);
                     totalLikes = likeCount - 1;
-
-                    console.log("Count Silme", totalLikes)
-                    console.log("Sildi", likeUserArray)
                 }
-
-                console.log("False")
 
             } else {
                 likeState.value = true;
-                likeUserArray.push(myId);
+                likeUserArray.push( myID);
                 totalLikes = likeCount + 1
-
-                console.log("Count Ekleme", totalLikes)
-
-                console.log("Ekledi ", likeUserArray)
-                console.log("True")
             }
 
-            const q2 = query(collection(firestore, "likes"), where("tweetId", "==", tweet.tweetId));
-            await getDocs(q2).then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const documentData = doc.data();
-                    const updatedData = { ...documentData, likeUser: likeUserArray, totalLike: totalLikes };
-                    updateDoc(doc.ref, updatedData)
-                });
-
-            });
 
             const queryTweets = query(collection(firestore, "tweetLists"), where("tweetId", "==", tweet.tweetId));
             await getDocs(queryTweets).then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     const documentData = doc.data();
-                    const updatedData = { ...documentData, totalLike: totalLikes };
+                    const updatedData = { ...documentData, totalLike: totalLikes, likeUser: likeUserArray };
                     updateDoc(doc.ref, updatedData);
                 })
             })
         }
 
-        return { options, likeButton, likeState, totalLikes }
+        return { options, likeButton, likeState, totalLikes,userProfile ,myID}
     }
-
 
 }
 </script>

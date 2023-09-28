@@ -1,7 +1,7 @@
 <template>
     <menu-component></menu-component>
     <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate"
-        @editProfile="profileButton"></profile-component>
+        @editProfile="profileButton" :isUser="isUserControl"></profile-component>
     <new-user></new-user>
 </template>
   
@@ -23,7 +23,6 @@ export default {
         NewUser
     },
     setup() {
-
         const userID = ref(null);
         const tweetValue = ref(false);
         const likeValue = ref(false);
@@ -51,6 +50,7 @@ export default {
         console.log("USER ID: ", userID.value)
         onMounted(async () => {
             userControlFunc();
+            buttonControl()
             const userQuery = query(collection(firestore, "users"));
             await getDocs(userQuery).then((querySnapshot) => {
                 querySnapshot.forEach((users) => {
@@ -66,13 +66,37 @@ export default {
 
         });
 
-        const profileButton = () => {
-
-
-            console.log("User")
-
+        const buttonControl = () => {
+            console.log("AAA")
+            // get(userRef).then((snapshot) => {
+            //     if (snapshot.exists()) {
+            //         const veri = snapshot.val();
+            //         buttonTypeControl.value = true
+            //         console.log("Gelen veri : ", veri)
+            //     } else {
+            //         buttonTypeControl.value = false
+            //         console.log("Veri bulunamadı!")
+            //     }
+            // }).catch((error) => {
+            //     console.log("Error : ", error);
+            // })
 
         }
+
+        const profileButton = () => {
+            // const userRef = RTref(realtime,  myID);
+            // const data = 
+            //     {userId: userID.value};
+            // set(userRef, data).then(() => {
+            //     console.log("OK")
+            // }).catch((error) => {
+            //     console.log("Hata: ", error);
+            // });
+
+            //USER DATA'DAN GELEN VERİYİ İŞLEYEREK SONUCA GİDİLİR
+           
+        }
+
         // Selected TabManu redesign
         const selectedTab = (key) => {
             if (key === "tweet") {

@@ -190,7 +190,7 @@ export default {
                         setTimeout(() => {
                             // router.go(0) ile sayfayı yenilemesini sağladık.
                             router.go(0);
-                        }, 1500);
+                        }, 500);
                     }
                 } else {
                     errorState.value.age = true;
@@ -202,8 +202,8 @@ export default {
                 errorMessage.value.display = "En az 3 karakter kullanıcı adı oluşturun."
             }
         }
-        // Uzunluk kontrolleri yapıldı
 
+        // Uzunluk kontrolleri yapıldı
         const biographyLenght = computed(() => {
             return enteredBiography.value.length <= 120 ? enteredBiography.value.length + "/120" : 'Maxiumum 120 karakterle sınırlıdır'
         });

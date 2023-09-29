@@ -6,7 +6,6 @@ import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/auth/LoginView.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
-import ProfileView from '@/views/ProfileView.vue';
 import UserView from '@/views/UserView.vue';
 
 
@@ -26,7 +25,6 @@ const routes = [
     meta: { requiresAuth: true },
   },
   { path: "/:catchAll(.*)", component: ErrorComponent, name: "ErrorComponent" },
-  {path:"/profile/:id" ,props:true,component:ProfileView,name:"ProfileView",meta:{requiresAuth:true}},
   {path:"/user/:id" ,props:true,component:UserView,name:"UserView",meta:{requiresAuth:true}},
 
 ];

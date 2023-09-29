@@ -1,7 +1,7 @@
 <template>
     <div>
       <h1>Sayfa Bulunamadı</h1>
-      <router-link to="/login">Anasayfaya Dön</router-link>
+      <router-link to="/login">Giriş Yap Ekranına Dön</router-link>
   </div>
   </template>
   

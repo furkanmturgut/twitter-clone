@@ -58,7 +58,7 @@ export default {
 
     const goToProfile = () => {
       router.push({
-        name: 'ProfileView',
+        name: 'UserView',
         params: { id: userId.value }
       })
     }

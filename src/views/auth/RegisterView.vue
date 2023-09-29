@@ -162,7 +162,8 @@ export default {
               biography:'',
               birthday:'',
               city:'',
-              fullname:''
+              fullname:'',
+              following:[]
 
             });
             setTimeout(() => {

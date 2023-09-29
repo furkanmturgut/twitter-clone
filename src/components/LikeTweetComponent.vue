@@ -39,9 +39,7 @@ export default {
         userID.value = router.currentRoute.value.params.id;
 
         const userProfile = (selectUser) => {
-            console.log("SELECTED ID: ", selectUser)
-            console.log("User ID : ",userID.value)
-            if (selectUser ==  userID.value) {
+            if (selectUser == userID.value) {
                 router.push({ name: "ProfileView", params: { id: selectUser } })
             } else {
                 router.push({ name: "UserView", params: { id: selectUser } })
@@ -51,34 +49,28 @@ export default {
 
 
         userID.value = router.currentRoute.value.params.id;
-        console.log("Router PArams Like:",userID.value)
-       onMounted(()=> {
-        let likeArray = [];
-        const q = query(collection(firestore, "tweetLists"));
+        onMounted(() => {
+            let likeArray = [];
+            const q = query(collection(firestore, "tweetLists"));
             onSnapshot(q, (querySnapshot) => {
                 querySnapshot.forEach(() => {
                     likeArray = [];
                 });
             });
 
-            onSnapshot(q,(querySnapshot)=>{
-                querySnapshot.forEach((item)=>{
+            onSnapshot(q, (querySnapshot) => {
+                querySnapshot.forEach((item) => {
                     likeArray.push(item.data())
 
-                    console.log("Data 2: ",likeArray);
-
-                     myLike.value = likeArray.filter((item)=>{
-                        return item.likeUser.some((user)=> user ==userID.value
-)
+                    myLike.value = likeArray.filter((item) => {
+                        return item.likeUser.some((user) => user == userID.value)
                     });
-
-                    console.log("My Like : ",myLike)
 
                 });
             })
-       });
+        });
 
-       return {myLike,userProfile}
+        return { myLike, userProfile }
     }
 }
 

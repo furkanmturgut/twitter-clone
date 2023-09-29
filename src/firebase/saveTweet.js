@@ -3,8 +3,8 @@ import { app } from "@/firebase/config";
 
 const firestore = getFirestore(app);
 
-const saveTweet = async (data) => {
+const userFollowing = async (data) => {
   await addDoc(collection(firestore, "tweetLists"), data);
 };
 
-export default saveTweet;
+export default userFollowing;

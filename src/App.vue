@@ -14,14 +14,14 @@ export default {
 </script>
 
 <style >
+@import url('https://fonts.googleapis.com/css2?family=PT+Sans&display=swap');
 body {
   margin: 0px !important;
 
 }
 
 * {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-}
+  font-family: 'PT Sans', sans-serif;}
 
 .cardRow {
   display: flex;

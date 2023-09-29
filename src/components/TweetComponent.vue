@@ -50,11 +50,6 @@ export default {
                 console.log("Buradan gitti")
                 router.push({ name: "UserView", params: { id: selectUser } })
 
-            } else {
-                console.log("Buradan gitti 2")
-
-                router.push({ name: "ProfileView", params: { id: selectUser } })
-
             }
         }
 
@@ -67,7 +62,7 @@ export default {
             // console.log("Like User Array :", likeArray.value[0])
             //Kullanıcıya göre filterelendi
             const filterLikeUser = likeUserArray.filter((item) => {
-                return item ==  myID
+                return item ==  myID;
             });
 
 
@@ -89,7 +84,6 @@ export default {
                 likeUserArray.push( myID);
                 totalLikes = likeCount + 1
             }
-
 
             const queryTweets = query(collection(firestore, "tweetLists"), where("tweetId", "==", tweet.tweetId));
             await getDocs(queryTweets).then((querySnapshot) => {

@@ -25,8 +25,8 @@
             <div
                 style="display: flex; width: 100%; height:auto; justify-content: flex-end; margin-right: 20px; align-items: center;">
                 <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-                <TWButton @click="profileButton" class="followStyle">{{ isUser ? 'Düzenle' :
-                    'Takip Et' }}</TWButton>
+                <TWButton @click="profileButton(filteredUser.id)" class="followStyle">{{ isUser ? 'Düzenle' : followChange ? 'Takip Et':
+                    'Takip Ediliyor' }}</TWButton>
             </div>
 
         </div>
@@ -34,8 +34,8 @@
         <div class="descArea">
             <!-- bio text -->
             <p :class="[filteredUser.biography != '' ? 'bioActive' : 'bioInActive']">
-                {{ filteredUser.biography == '' && isUser ? 'Düzenleme yapmak için dokun' : filteredUser.biography }}</p>
-            <!-- bio info (city born) -->
+                {{ filteredUser.biography == '' && isUser ? 'Düzenleme yapmak için düzenleye tıkla' : filteredUser.biography }}</p>
+            <!-- bio info (city age) -->
             <div style="display: flex; flex-direction: row; align-items: center; margin-left: 20px; color: #696969;">
                 <span style="margin-right: 20px;">
                     <i class="pi pi-map-marker"> {{ filteredUser.city != '' ? ' ' + filteredUser.city : ' -' }}</i>
@@ -51,8 +51,8 @@
 
             <!-- following and followers -->
             <div style="display: flex; flex-direction: row; margin-left: 20px; margin-top: 20px;">
-                <span style="margin-right: 20px;"> <strong>0 </strong>Takipçi</span>
-                <span><strong>0 </strong>Takip Edilen</span>
+                <span style="margin-right: 20px;"> <strong>{{ followMe == 0 ? '0':followMe }} </strong> Takipçi</span>
+                <span><strong>{{ filteredUser.following == undefined ? '0':filteredUser.following.length }}</strong> Takip Edilen</span>
             </div>
 
             <div>
@@ -90,7 +90,7 @@ import LikeTweetComponent from './LikeTweetComponent.vue';
 import { useRouter } from 'vue-router';
 export default {
     components: { TweetComponent,LikeTweetComponent },
-    props: ["filteredUser", "joinedDate", "isUser"],
+    props: ["filteredUser", "joinedDate", "isUser","followMe","followChange"],
     emits: ["editProfile"],
 
     setup(props, { emit }) {
@@ -102,9 +102,7 @@ export default {
         const router = useRouter()
         const selectedState = ref("tweet");
 
-
         userID.value = router.currentRoute.value.params.id;
-        console.log("Router PArams Like:",userID.value)
 
         const profileButton = (display) => {
             emit("editProfile", display)
@@ -166,8 +164,6 @@ export default {
     margin-top: 26px;
     font-size: 14px;
     color: #25abe1ef;
-    cursor: pointer;
-    text-decoration: underline;
 }
 
 .active {

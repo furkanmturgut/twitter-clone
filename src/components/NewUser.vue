@@ -1,7 +1,15 @@
 <template>
   <div class="otherArea">
-    <TWAutoComplete class="searchStyle" v-model="valueSrch" :suggestions="items" @complete="search"
-      placeholder="Profil ara" />
+    <TWAutoComplete class="searchStyle" v-model="valueSearch" optionLabel="displayName"  :suggestions="items"
+      @complete="search" @change="filterUser" placeholder="Profil ara">
+      <template #option="slotProps">
+        <div class="flex align-options-center">
+          <TWCircleImage class="tweetUserPhoto" :image="slotProps.option.photo" size="large" shape="circle"></TWCircleImage>
+          <div style="display: flex; align-items: center;"><span style="font-weight: bold; padding: 6px; color: #25abe1ef;">{{slotProps.option.displayName }}</span></div>
+        </div>
+      </template>
+    </TWAutoComplete>
+   
     <div style="margin-top: 30px; display: flex; justify-content: center;">Yeni Katılanlar</div>
 
     <div v-for="user in newUserList" :key="user.id"
@@ -22,13 +30,16 @@ import {
 } from "firebase/firestore";
 import { app } from "@/firebase/config.js";
 import { ref } from 'vue';
+import { useRouter } from "vue-router";
 export default {
   name: "UserComponent",
   setup() {
     const newUserList = ref([]);
     const fullUsersList = ref([]);
-
+    const valueSearch = ref('');
     const firestore = getFirestore(app);
+    const items = ref([]);
+    const router = useRouter();
 
     const getUserFunc = async () => {
       const userQuery = query(
@@ -47,8 +58,37 @@ export default {
 
     getUserFunc();
 
+    // Aramada gelen öge seçilir
+    const filterUser = () => {
+      const userDetail = valueSearch.value.id;
+      console.log("FT : ", userDetail);
 
-    return { newUserList }
+      if (userDetail != undefined) {
+        router.push({
+          name: "UserView",
+          params: { id: userDetail }
+        })
+      }
+    }
+
+    //Arama yapma alanı
+    const search = () => {
+      items.value = [];
+      const filteredUser = fullUsersList.value.filter((item) => {
+        return item.displayName.toLowerCase().includes(valueSearch.value.toLowerCase());
+      });
+      filteredUser.forEach((item) => {
+        items.value.push({
+          displayName: item.displayName,
+          id: item.id,
+          photo: item.profilePhoto
+        })
+      })
+
+    }
+
+
+    return { newUserList, search, items, valueSearch, filterUser, fullUsersList }
   }
 
 }
@@ -59,7 +99,7 @@ export default {
   height: 36px;
   display: flex;
   justify-content: center;
-  margin: 20px;
+  margin: 16px;
 }
 
 .otherArea {

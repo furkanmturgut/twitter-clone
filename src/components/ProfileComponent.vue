@@ -25,7 +25,7 @@
             <div
                 style="display: flex; width: 100%; height:auto; justify-content: flex-end; margin-right: 20px; align-items: center;">
                 <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
-                <TWButton @click="profileButton(filteredUser.id)" class="followStyle">{{ isUser ? 'Düzenle' : followChange ? 'Takip Et':
+                <TWButton :loading="loading" @click="profileButton(filteredUser.id)" class="followStyle">{{ isUser ? 'Düzenle' : followChange ? 'Takip Et':
                     'Takip Ediliyor' }}</TWButton>
             </div>
 
@@ -41,7 +41,7 @@
                     <i class="pi pi-map-marker"> {{ filteredUser.city != '' ? ' ' + filteredUser.city : ' -' }}</i>
                 </span>
                 <span>
-                    <i class="pi pi-calendar"> {{ filteredUser.birthday != '' ? ' ' + filteredUser.birthday : ' -' }}</i>
+                    <i class="pi pi-calendar"> {{ filteredUser.birthday != '' ? ' ' + filteredUser.birthday + ' yaşında' : ' -' }}</i>
                 </span>
             </div>
             <!--joined date -->
@@ -104,8 +104,8 @@ export default {
 
         userID.value = router.currentRoute.value.params.id;
 
-        const profileButton = (display) => {
-            emit("editProfile", display)
+        const profileButton = (userId) => {
+            emit("editProfile", userId)
         }
 
         onMounted(() => {

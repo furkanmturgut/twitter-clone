@@ -90,7 +90,6 @@ export default {
         const profileButton = async (userId) => {
             // Eğer kullanıcı düzenleme yapacaksa
             if (isUserControl.value) {
-                console.log("sea user benim");
                 dialog.open(EditProfile, {
                     props: {
                         header: 'Profili Güncelle',

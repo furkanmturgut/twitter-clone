@@ -1,5 +1,6 @@
 <template>
-  <div class="homeMenu" >
+  <div class="homeMenu">
+    <TWConfirmDialog></TWConfirmDialog>
     <img class="menuLogo" src="@/assets/x-logo.png">
     <div style="font-size: 20px; font-family: 'Times New Roman', Times, serif; color: #25abe1ef;">Hoşgeldin, {{ userName
     }}</div>
@@ -12,7 +13,7 @@
     </div>
 
     <div class="menuList">
-      <router-link class="routerMenu" :to="{ name: 'LoginView' }"> <i class="pi pi-comments"></i>
+      <router-link class="routerMenu" :to="{ name: 'MesasageView' }"> <i class="pi pi-comments"></i>
         Mesajlar</router-link>
     </div>
     <div class="menuList hoverExit" style="cursor: pointer;" @click="signOutUser">
@@ -25,9 +26,11 @@
 
 <script>
 import { useRouter } from 'vue-router';
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getAuth,signOut, onAuthStateChanged } from 'firebase/auth';
 import { app } from '@/firebase/config';
 import { onMounted, ref } from 'vue';
+import { useConfirm } from "primevue/useconfirm";
+
 export default {
   name: "MenuComponent",
   setup() {
@@ -35,6 +38,8 @@ export default {
     const userId = ref(null);
     const router = useRouter();
     const auth = getAuth(app);
+    const confirm = useConfirm();
+
 
     //Verileri aldık firebase hatası var bakacam!
     onMounted(() => {
@@ -51,9 +56,24 @@ export default {
 
 
     const signOutUser = () => {
-      signOut(auth).then(() => {
-        router.push({ name: 'LoginView' })
-      });
+
+
+      confirm.require({
+        header: 'Çıkış Yap',
+        message: 'Çıkış yapmak istediğinize emin misiniz ?',
+        icon: 'pi pi-exclamation-circle',
+        acceptLabel: 'Evet',
+        rejectLabel: 'İptal',
+        accept: () => {
+          signOut(auth).then(() => {
+            router.push({ name: 'LoginView' })
+          });
+        },
+          reject: () => {
+            console.log("Reject")
+
+          }
+        })
     }
 
     const goToProfile = () => {
@@ -63,7 +83,7 @@ export default {
       })
     }
 
-    return {userId, userName, signOutUser, goToProfile }
+    return { userId, userName, signOutUser, goToProfile }
   }
 
 }

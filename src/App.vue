@@ -1,27 +1,28 @@
 <template>
   <div class="cardRow">
+ 
     <router-view></router-view>
-</div>
+  </div>
 </template>
 
 <script>
 
 export default {
-
-  
-  name:'App'
+  name: 'App',
 }
 </script>
 
 <style >
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans&display=swap');
+
 body {
   margin: 0px !important;
 
 }
 
 * {
-  font-family: 'PT Sans', sans-serif;}
+  font-family: 'PT Sans', sans-serif;
+}
 
 .cardRow {
   display: flex;

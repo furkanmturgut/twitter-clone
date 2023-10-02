@@ -24,7 +24,7 @@
             <!-- follow and share button  -->
             <div
                 style="display: flex; width: 100%; height:auto; justify-content: flex-end; margin-right: 20px; align-items: center;">
-                <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h"></TWButton>
+                <TWButton class="shareButtonStyle" icon="pi pi-ellipsis-h" @click="startMessage(filteredUser)"></TWButton>
                 <TWButton :loading="loading" @click="profileButton(filteredUser.id)" class="followStyle">{{ isUser ? 'Düzenle' : followChange ? 'Takip Et':
                     'Takip Ediliyor' }}</TWButton>
             </div>
@@ -91,7 +91,7 @@ import { useRouter } from 'vue-router';
 export default {
     components: { TweetComponent,LikeTweetComponent },
     props: ["filteredUser", "joinedDate", "isUser","followMe","followChange"],
-    emits: ["editProfile"],
+    emits: ["editProfile","startMessage"],
 
     setup(props, { emit }) {
         const firestore = getFirestore(app);
@@ -106,6 +106,10 @@ export default {
 
         const profileButton = (userId) => {
             emit("editProfile", userId)
+        };
+
+        const startMessage = (filteredUser)=>{
+            emit("startMessage",filteredUser)
         }
 
         onMounted(() => {
@@ -144,7 +148,7 @@ export default {
         }
         selectedTab();
 
-        return { selectedTab, profileButton, tweetList, tweetValue, likeValue ,selectedState}
+        return { selectedTab, profileButton, tweetList, tweetValue, likeValue ,selectedState,startMessage}
     }
 
 }

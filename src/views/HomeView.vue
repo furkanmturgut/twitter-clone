@@ -5,19 +5,12 @@
 </template>
 
 <script>
-
+import NewUser from '@/components/NewUser.vue';
 import HomeComponent from '@/components/HomeComponent.vue';
 import MenuComponent from '@/components/MenuComponent.vue';
-import NewUser from '@/components/NewUser.vue';
-
-
 export default {
   name: 'HomeView',
-  components: {
-    HomeComponent,
-    MenuComponent,NewUser
-    
-  },
+  components: { HomeComponent, NewUser,MenuComponent }
 
 }
 </script>

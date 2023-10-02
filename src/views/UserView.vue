@@ -1,8 +1,8 @@
 <template>
     <menu-component></menu-component>
     <profile-component :filteredUser="filteredUser" :joinedDate="joinedDate" @editProfile="profileButton"
-        :isUser="isUserControl" :followMe="followMe" :followChange="followChange"></profile-component>
-    <new-user></new-user>
+        :isUser="isUserControl" :followMe="followMe" :followChange="followChange" @startMessage="startMessage"></profile-component>
+    <new-user></new-user>    
 </template>
   
 <script>
@@ -14,6 +14,7 @@ import { useRouter } from 'vue-router';
 import ProfileComponent from '@/components/ProfileComponent.vue';
 import MenuComponent from '@/components/MenuComponent.vue';
 import NewUser from '@/components/NewUser.vue';
+
 import { useDialog } from 'primevue/usedialog';
 
 export default {
@@ -22,6 +23,8 @@ export default {
         ProfileComponent,
         MenuComponent,
         NewUser
+
+   
     },
     setup() {
         const userID = ref(null);
@@ -57,7 +60,7 @@ export default {
         }
 
         userID.value = router.currentRoute.value.params.id;
-        console.log("USER ID: ", userID.value)
+     
         onMounted(async () => {
             userControlFunc();
             const userQuery = query(collection(firestore, "users"));
@@ -86,6 +89,10 @@ export default {
             });
 
         }); // onMounted
+
+        const startMessage = (filteredUser)=>{
+            router.push({name:'ChatView',params:{id:filteredUser.id}})
+        }
 
         const profileButton = async (userId) => {
             // Eğer kullanıcı düzenleme yapacaksa
@@ -161,7 +168,7 @@ export default {
         }
         selectedTab();
 
-        return { selectedTab, tweetValue, likeValue, isUserControl, profileButton, filteredUser, joinedDate, followMe, followChange }
+        return { selectedTab, tweetValue, likeValue, isUserControl, profileButton, filteredUser, joinedDate, followMe, followChange,startMessage }
     }
 }
 </script>

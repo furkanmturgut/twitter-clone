@@ -13,8 +13,7 @@
     </div>
 
     <div class="menuList">
-      <router-link class="routerMenu" :to="{ name: 'MesasageView' }"> <i class="pi pi-comments"></i>
-        Mesajlar</router-link>
+      <a class="routerMenu" style="cursor: pointer;"  @click="goToMessage"> <i class="pi pi-comments"></i> Mesajlar</a>
     </div>
     <div class="menuList hoverExit" style="cursor: pointer;" @click="signOutUser">
       <i class="pi pi-comments"></i>
@@ -56,8 +55,6 @@ export default {
 
 
     const signOutUser = () => {
-
-
       confirm.require({
         header: 'Çıkış Yap',
         message: 'Çıkış yapmak istediğinize emin misiniz ?',
@@ -83,7 +80,14 @@ export default {
       })
     }
 
-    return { userId, userName, signOutUser, goToProfile }
+    const goToMessage = ()=>{
+      router.push({
+        name:'MessageView',
+        params:{id:userId.value}
+      })
+    }
+
+    return { userId, userName, signOutUser, goToProfile ,goToMessage}
   }
 
 }

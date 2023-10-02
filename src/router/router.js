@@ -1,31 +1,26 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import RegisterView from "../views/auth/RegisterView.vue";
-import WelcomeView from "@/views/auth/WelcomeView.vue";
 import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/auth/LoginView.vue";
-import ForgotPassword from "@/views/auth/ForgotPassword.vue";
-import ErrorComponent from "@/components/ErrorComponent.vue";
-import UserView from '@/views/UserView.vue';
-
 
 const routes = [
-  { path: "/", component: WelcomeView, name: "WelcomeView" },
-  { path: "/register", component: RegisterView, name: "RegisterView" },
-  { path: "/login", component: LoginView, name: "LoginView" },
+  { path: "/", component: ()=>import("@/views/auth/WelcomeView.vue"), name: "WelcomeView" },
+  { path: "/register", component: ()=> import("@/views/auth/RegisterView.vue"), name: "RegisterView" },
+  { path: "/login", component: ()=>import("@/views/auth/LoginView.vue"), name: "LoginView" },
   {
     path: "/forgot-password",
-    component: ForgotPassword,
+    component: ()=>import("@/views/auth/ForgotPassword.vue"),
     name: "ForgotPassword",
   },
   {
-    path: "/home",
+    path: "/home",  
     component: HomeView,
     name: "HomeView",
     meta: { requiresAuth: true },
   },
-  { path: "/:catchAll(.*)", component: ErrorComponent, name: "ErrorComponent" },
-  {path:"/user/:id" ,props:true,component:UserView,name:"UserView",meta:{requiresAuth:true}},
+  { path: "/:catchAll(.*)", component: ()=>import("@/components/ErrorComponent.vue"), name: "ErrorComponent" },
+  {path:"/user/:id" ,props:true,component:()=>import("@/views/UserView.vue"),name:"UserView",meta:{requiresAuth:true}},
+  {path:"/messages/:id",props:true,component:()=>import("@/views/MessageView.vue"),name:"MessageView",meta:{requiresAuth:true}},
+  {path:"/chat/:id",props:true,component:()=>import("@/views/ChatScreen.vue"),name:"ChatView",meta:{requiresAuth:true}}
 
 ];
 

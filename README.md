@@ -43,4 +43,3 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 Bu projeyi geliştirirken öğrendiğim yeni yetenekleri ve deneyimleri kazanmak benim için çok önemliydi. Daha fazla bilgi ve ayrıntılar için projenin GitHub deposunu ziyaret edebilirsiniz.
-r değişkene eşitleyerek props'u güncelleyebilir miyiz
